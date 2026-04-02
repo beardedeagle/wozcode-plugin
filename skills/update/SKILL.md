@@ -1,6 +1,12 @@
-# Update WozCode Plugin
+---
+name: woz-update
+description: Update the WOZCODE plugin to the latest version.
+allowed-tools: Bash(claude *, rm *)
+---
 
-Update the WozCode plugin to the latest version.
+# Update WOZCODE Plugin
+
+Update the WOZCODE plugin to the latest version.
 
 Run these steps in sequence. After each bash command, check the exit code before proceeding.
 
@@ -41,5 +47,5 @@ rm -f "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/wozcode/update-available.json"
 ```
 
 After all steps succeed, tell the user:
-- ✅ WozCode updated successfully
+- ✅ WOZCODE updated successfully
 - Run `/reload-plugins` to apply the update

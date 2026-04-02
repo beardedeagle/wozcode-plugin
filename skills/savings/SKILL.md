@@ -1,10 +1,10 @@
 ---
 name: woz-savings
-description: Show WozCode savings report - calls saved, time saved, tokens saved, and lifetime totals.
+description: Show WOZCODE savings report - calls saved, time saved, tokens saved, and lifetime totals.
 allowed-tools: Bash(node *)
 ---
 
-Run the WozCode savings report:
+Run the WOZCODE savings report:
 
 ```bash
 node ${CLAUDE_PLUGIN_ROOT}/scripts/savings-report.js
