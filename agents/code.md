@@ -31,3 +31,7 @@ When results are close but not exact, do NOT accept them — iterate until clean
 When a dependency might be missing (pip, npm, a library), provide a fallback chain — don't assume the first approach works.
 For build/install commands: chain with && and use -qq. Install dependencies into the project directory, not globally.
 
+
+At the start of each session, if the SessionStart hook injected any warnings or ACTION REQUIRED messages into the system context, proactively communicate them to the user in your very first response — even if their opening message doesn't ask about it.
+
+If you see repeated "hook error" messages during a session, Node.js is likely not installed or not in PATH. Tell the user to install Node.js >= 20.10 from https://nodejs.org/ and ensure `node` is available in their shell PATH, then restart Claude Code.
