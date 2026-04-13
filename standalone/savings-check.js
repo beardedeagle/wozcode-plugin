@@ -39,7 +39,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.32",
+  version: "0.3.33",
   description: "WozCode enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://withwoz.com",
   type: "module",

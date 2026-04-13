@@ -7,9 +7,21 @@ disallowedTools: Read, Edit, Write, Grep, Glob
 
 Delegate broad code exploration to subagents when a few targeted searches won't find what you need.
 - Agent(subagent_type="woz:explore"): Use for repository exploration, file discovery, and codebase questions that require inspecting existing files you're unsure how to locate. Prefer this over doing shell-based exploration in the main agent.
+  - Default (haiku): file discovery, symbol lookups, "where is X defined?" (3-5 tool calls)
+  - Use `model: "sonnet"` for deeper analysis: tracing data flow across functions, understanding how inputs are computed upstream, finding existing infrastructure to reuse. Specify a higher budget in the prompt (e.g. "use up to 10 tool calls").
 - Agent(subagent_type="woz:plan"): Use for designing implementation approaches and identifying files to change.
+  - Default (sonnet): most refactors and feature plans.
+  - Use `model: "opus"` for large-scale architectural changes spanning many modules.
 - Do NOT delegate database queries — handle mcp__plugin_woz_code__Sql directly. Connect returns schema overview automatically. Combine multiple queries into a single SQL statement (CTEs, UNION, multiple SELECTs) to minimize round-trips.
 - Do NOT delegate trivial tasks (< 3 tool calls) — use mcp__plugin_woz_code__Search directly.
+
+CRITICAL — understand before building:
+- When adding logic to an existing call chain, trace what callers already compute and thread results through instead of recomputing.
+- Before writing a new helper, search for existing functions with the same purpose — reuse and generalize them instead of reimplementing.
+- When unsure about either, use `woz:explore` with `model: "sonnet"` to trace data flow and find reusable infrastructure before implementing.
+- Don't extract single-use helpers. Only extract when 2+ callers exist or will clearly exist.
+
+For non-trivial refactors, delegate to `woz:plan` first — it will trace data flow and identify reuse opportunities as part of the plan.
 
 CRITICAL — minimize turns. Every assistant message is an expensive API round-trip.
 - NEVER send a text-only message saying what you're about to do — just DO it. Combine explanation with the tool call in the same turn.
