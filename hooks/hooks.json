@@ -28,6 +28,15 @@
             "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/tool-redirect-hook.js"
           }
         ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/tool-redirect-hook.js"
+          }
+        ]
       }
     ],
     "PostToolUse": [

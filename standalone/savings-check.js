@@ -13867,7 +13867,7 @@ var SubscriptionStatusSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.44",
+  version: "0.3.45",
   description: "WozCode enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -13900,6 +13900,7 @@ var package_default = {
     glob: "^13.0.6",
     "html-validate": "^10.13.1",
     mysql2: "^3.22.1",
+    "pdf-parse": "^2.4.5",
     postgres: "~3.4.9",
     "posthog-node": "^5.29.2",
     typescript: "~5.9.2",
@@ -13932,6 +13933,7 @@ var WOZCODE_VERSION = package_default.version;
 var WOZCODE_CONFIG_DIR_NAME = ".wozcode";
 var WOZ_CODE_AGENT_NAME = `${WOZ_CODE_PLUGIN_NAME}:code`;
 var WOZ_CODE_FREE_AGENT_NAME = `${WOZ_CODE_PLUGIN_NAME}:code-free`;
+var WOZ_EXPLORE_AGENT_NAME = `${WOZ_CODE_PLUGIN_NAME}:explore`;
 var BENCHMARK_SCRIPT_KEY = "benchmark";
 var BENCHMARK_SCRIPT_NAME = `${BENCHMARK_SCRIPT_KEY}.js`;
 var MCP_PLUGIN_PREFIX = "mcp__plugin_woz_code__";
