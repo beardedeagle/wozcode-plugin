@@ -57,9 +57,8 @@ Just use Claude Code normally — WOZCODE tools activate automatically. The plug
 |-------|--------------|
 | `woz:code` | Main agent — coding, editing, search, SQL. Auto-delegates to the others when useful. |
 | `woz:explore` | Fast read-only codebase exploration (runs on haiku for speed) |
-| `woz:plan` | Architecture and implementation planning (runs on haiku for speed) |
 
-You don't need to switch agents manually. `woz:code` delegates to `woz:explore` and `woz:plan` as subagents when it makes sense.
+You don't need to switch agents manually. `woz:code` delegates to `woz:explore` as a subagent when it makes sense.
 
 ### Commands
 
@@ -108,15 +107,15 @@ Changes take effect immediately. For `attribution`, `statusLine`, and `spinnerVe
 To get the latest version:
 
 ```
-/reload-plugins
+/woz-update
 ```
 
-If you need to fully reinstall:
+If `/woz-update` fails, force a clean reinstall from your shell:
 
-```
-/plugin marketplace remove WithWoz/wozcode-plugin
-/plugin marketplace add WithWoz/wozcode-plugin
-/plugin install woz@wozcode-marketplace
+```bash
+claude plugin uninstall woz@wozcode-marketplace
+claude plugin install woz@wozcode-marketplace
+rm -f "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/wozcode/update-available.json" "$HOME/.wozcode/update-available.json"
 ```
 
 > **Note:** After reinstalling, quit and restart Claude Code for changes to take effect.
