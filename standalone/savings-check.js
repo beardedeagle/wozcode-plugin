@@ -13867,7 +13867,7 @@ var SubscriptionStatusSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.50",
+  version: "0.3.52",
   description: "WozCode enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -29854,7 +29854,9 @@ function printSection(title, e2, dateRange) {
   console.log(
     `    ${GREEN}${formatCost(e2.rawDetected.costSavedInUsd)}${RESET} on API costs  ${DIM}(~${pctSaved}% of spend)${RESET}`
   );
-  console.log(`    ${GREEN}${Math.round(e2.rawDetected.callsSaved).toLocaleString()}${RESET} tool-call roundtrips avoided`);
+  console.log(
+    `    ${GREEN}${Math.round(e2.rawDetected.callsSaved).toLocaleString()}${RESET} tool-call roundtrips avoided`
+  );
   console.log(`    ${GREEN}${formatDuration(e2.rawDetected.timeSavedInMs)}${RESET} of wait time`);
   if (e2.topToolTypes.length > 0) {
     console.log();
