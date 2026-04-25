@@ -13867,7 +13867,7 @@ var SubscriptionStatusSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.55",
+  version: "0.3.56",
   description: "WozCode enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -13893,6 +13893,7 @@ var package_default = {
     "@aws-sdk/credential-provider-node": "^3.972.32",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@pg-nano/pg-parser": "~16.1.5",
+    "@smithy/fetch-http-handler": "~5.3.12",
     "@smithy/protocol-http": "^5.3.14",
     "@smithy/signature-v4": "^5.3.14",
     "@supabase/supabase-js": "^2.103.3",
