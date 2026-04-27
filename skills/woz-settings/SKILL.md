@@ -37,6 +37,7 @@ Where `<key>` is a setting name and `<value>` is `true` or `false`.
 | `statusLineSession` | `true` | Show session savings in status line |
 | `statusLineLifetime` | `true` | Show lifetime savings in status line |
 | `statusLineTips` | `true` | Show quick tips in status line |
+| `statusLineShare` | `true` | Show /woz-share referral hint in status line |
 | `spinnerVerbs` | `true` | WOZ-themed spinner verbs |
 
 **Examples:**

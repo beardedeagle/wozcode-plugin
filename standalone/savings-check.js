@@ -13832,6 +13832,11 @@ function date4(params) {
 config(en_default());
 
 // src/common/config/auth-types.ts
+var ReferralCodeResponseSchema = external_exports.object({
+  code: external_exports.string(),
+  timesRedeemed: external_exports.number(),
+  creditBalanceCents: external_exports.number()
+});
 var WozcodeActiveBonusSchema = external_exports.object({
   id: external_exports.string(),
   amountInUsd: external_exports.number(),
@@ -13867,7 +13872,7 @@ var SubscriptionStatusSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.56",
+  version: "0.3.57",
   description: "WozCode enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -13910,6 +13915,7 @@ var package_default = {
   },
   devDependencies: {
     "@aws-sdk/client-bedrock-runtime": "~3.1032.0",
+    "@aws/bedrock-token-generator": "^1.1.0",
     "@eslint/js": "~10.0.1",
     "@smithy/types": "~4.14.1",
     "@types/node": "~25.6.0",
