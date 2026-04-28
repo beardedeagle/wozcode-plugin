@@ -3,6 +3,7 @@
     "code": {
       "command": "node",
       "args": ["${CLAUDE_PLUGIN_ROOT}/servers/code-server.js"],
+      "alwaysLoad": true,
       "env": {
         "WOZCODE_POSTHOG_ENABLED": "true",
         "WOZCODE_POSTHOG_PROJECT_TOKEN": "phc_F3mo2emdspgzD4QmFMQxHQfab1TyXgCAU7eYBakKq9k",
