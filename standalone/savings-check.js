@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * WozCode savings-check — read-only analysis.
+ * WOZCODE savings-check — read-only analysis.
  *
  * What it does: scans ~/.claude/projects/*.jsonl for batching patterns and
  * prints a cost estimate. Runs entirely on your machine.
@@ -13874,8 +13874,8 @@ var SubscriptionStatusSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.64",
-  description: "WozCode enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
+  version: "0.3.65",
+  description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
   main: "dist/plugin/servers/code-stdio.js",
@@ -13884,12 +13884,25 @@ var package_default = {
   },
   scripts: {
     build: "tsc",
-    "build:plugin:prod": "tsc && node dist/plugin/build-plugin.js && node dist/plugin-codex/build-plugin-codex.js",
-    "build:plugin": "tsc && node dist/plugin/build-plugin.js --no-obfuscate && node dist/plugin-codex/build-plugin-codex.js --no-obfuscate",
+    "build:plugin:prod": "tsc && node dist/plugin/build-plugin.js",
+    "build:plugin": "tsc && node dist/plugin/build-plugin.js --no-obfuscate",
+    "build:plugin-codex:prod": "tsc && node dist/plugin/codex/build-plugin-codex.js",
+    "build:plugin-codex": "tsc && node dist/plugin/codex/build-plugin-codex.js --no-obfuscate",
+    "build:plugin-with-cowork:prod": "tsc && node dist/plugin/build-plugin.js --cowork",
+    "build:plugin-with-cowork": "tsc && node dist/plugin/build-plugin.js --no-obfuscate --cowork",
+    "build:plugin:all:prod": "tsc && node dist/plugin/build-plugin.js --cowork && node dist/plugin/codex/build-plugin-codex.js",
+    "build:plugin:all": "tsc && node dist/plugin/build-plugin.js --no-obfuscate --cowork && node dist/plugin/codex/build-plugin-codex.js --no-obfuscate",
+    "build:desktop:css": "npx @tailwindcss/cli -i src/desktop/webview/input.css -o src/desktop/webview/styles.css",
+    "build:desktop": "npm run build:desktop:css && bunx electrobun build && npm run patch:desktop",
+    "build:desktop:release": "npm run build:desktop:css && WOZ_RELEASE_BUILD=1 bunx electrobun build --env=stable && npm run patch:desktop",
+    "patch:desktop": "tsx scripts/patch-desktop-plist.ts",
+    "package:desktop": "tsx scripts/package-desktop.ts",
+    "dev:desktop": "npm run build:desktop:css && bunx electrobun dev",
     lint: "npx eslint src/",
     compile: "tsc --noEmit",
     format: "npx prettier --write 'src/**/*.{ts,js}'",
-    test: "node --import tsx --test 'src/**/*.test.ts'"
+    test: 'node --import tsx --test "src/**/*.test.ts"',
+    "test:integration": 'node --import tsx --test "src/test/integration/**/*.int-test.ts"'
   },
   author: "Woz",
   license: "UNLICENSED",
@@ -13905,12 +13918,16 @@ var package_default = {
     "@smithy/signature-v4": "^5.3.14",
     "@supabase/supabase-js": "^2.103.3",
     commander: "~14.0.3",
+    electrobun: "^1.0.0",
     glob: "^13.0.6",
     "html-validate": "^10.13.1",
     mysql2: "^3.22.1",
     "pdf-parse": "^2.4.5",
+    playwright: "^1.59.1",
     postgres: "~3.4.9",
     "posthog-node": "^5.29.2",
+    react: "^19.1.4",
+    "react-dom": "^19.1.4",
     typescript: "~5.9.2",
     yaml: "^2.8.3",
     zod: "^4.3.6"
@@ -13920,37 +13937,45 @@ var package_default = {
     "@aws/bedrock-token-generator": "^1.1.0",
     "@eslint/js": "~10.0.1",
     "@smithy/types": "~4.14.1",
+    "@tailwindcss/cli": "^4.2.2",
     "@types/node": "~25.6.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@typescript-eslint/utils": "^8.58.2",
     dotenv: "~17.4.2",
     esbuild: "^0.28.0",
     eslint: "~10.2.1",
     "javascript-obfuscator": "^5.4.1",
     openai: "~6.34.0",
-    playwright: "^1.59.1",
+    tailwindcss: "^4.2.2",
     tsx: "~4.21.0",
     "typescript-eslint": "^8.58.2"
   },
   engines: {
-    node: ">=20.11"
+    node: ">=22.5"
   }
 };
 
 // src/common/config/constants.ts
 var WOZ_CODE_PLUGIN_NAME = "woz";
 var WOZCODE_VERSION = package_default.version;
-var WOZCODE_CONFIG_DIR_NAME = ".wozcode";
+var WOZCODE_CLI_NAME = "wozcode";
 var WOZ_CODE_AGENT_NAME = `${WOZ_CODE_PLUGIN_NAME}:code`;
 var WOZ_CODE_FREE_AGENT_NAME = `${WOZ_CODE_PLUGIN_NAME}:code-free`;
 var WOZ_EXPLORE_AGENT_NAME = `${WOZ_CODE_PLUGIN_NAME}:explore`;
 var BENCHMARK_SCRIPT_KEY = "benchmark";
 var BENCHMARK_SCRIPT_NAME = `${BENCHMARK_SCRIPT_KEY}.js`;
+var WOZCODE_CLI_WRAPPER_NAME = WOZCODE_CLI_NAME;
+var WOZCODE_CLI_WRAPPER_FILENAME_WIN = `${WOZCODE_CLI_WRAPPER_NAME}.cmd`;
+var ROUTER_DAEMON_SCRIPT_KEY = "router-daemon";
+var ROUTER_DAEMON_SCRIPT_NAME = `${ROUTER_DAEMON_SCRIPT_KEY}.js`;
 var MCP_PLUGIN_PREFIX = "mcp__plugin_woz_code__";
 var WOZ_MARKETPLACE_GITHUB_REPO = "WithWoz/wozcode-plugin";
 var WOZ_MARKETPLACE_PLUGIN_JSON_URL = `https://raw.githubusercontent.com/${WOZ_MARKETPLACE_GITHUB_REPO}/main/.claude-plugin/plugin.json`;
-
-// src/common/config/config.ts
-var LEGACY_CONFIG_DIR = path2.join(os2.homedir(), WOZCODE_CONFIG_DIR_NAME);
+var WOZCODE_BRAND_NAME = "WOZCODE";
+var WOZ_DESKTOP_DOWNLOAD_URL_TEMPLATE = `https://github.com/${WOZ_MARKETPLACE_GITHUB_REPO}/releases/download/v{version}/${WOZCODE_BRAND_NAME}-darwin-{arch}.zip`;
+var WOZ_DESKTOP_APP_NAME = WOZCODE_BRAND_NAME;
+var WOZ_DESKTOP_BUNDLE_NAME = `${WOZ_DESKTOP_APP_NAME}.app`;
 
 // src/common/pricing/model-pricing.ts
 var CONTEXT_GROWTH_MULTIPLIER = 1.3;
@@ -13960,6 +13985,18 @@ function pricingFromInput(input, output) {
     cacheReadPerMillion: input * 0.1,
     cacheWritePerMillion: input * 1.25,
     outputPerMillion: output
+  };
+}
+function pricingWithLongContext(baseInput, baseOutput, thresholdTokens, longInput, longOutput) {
+  return {
+    ...pricingFromInput(baseInput, baseOutput),
+    longContext: {
+      thresholdTokens,
+      inputPerMillion: longInput,
+      cacheReadPerMillion: longInput * 0.1,
+      cacheWritePerMillion: longInput * 1.25,
+      outputPerMillion: longOutput
+    }
   };
 }
 var MODEL_PRICING = {
@@ -13978,10 +14015,8 @@ var MODEL_PRICING = {
   // Cursor Composer family. Pricing per Cursor docs (2026):
   //   Composer 2:      $0.50 in / $2.50 out / $0.20 cache read per million
   //   Composer 2 Fast: $1.50 in / $7.50 out / $0.35 cache read per million
-  // Cache-write rate is not published; use input rate as a conservative default.
-  // Two key variants per model: hyphenated (CLI flag form, e.g. 'composer-2-fast')
-  // and space-separated (display name form, e.g. 'composer 2 fast') so both the
-  // --cursor-model flag and the system-init event's `model` field resolve.
+  // Two key variants per model: hyphenated ('composer-2-fast', --cursor-model
+  // flag form) and space-separated ('composer 2 fast', system-init event form).
   // List Fast variants BEFORE base variants so the includes() fallback picks the
   // more specific match first.
   "composer-2-fast": {
@@ -13999,15 +14034,34 @@ var MODEL_PRICING = {
   "composer-2": { inputPerMillion: 0.5, cacheReadPerMillion: 0.2, cacheWritePerMillion: 0.5, outputPerMillion: 2.5 },
   "composer 2": { inputPerMillion: 0.5, cacheReadPerMillion: 0.2, cacheWritePerMillion: 0.5, outputPerMillion: 2.5 },
   "composer-1.5": pricingFromInput(3.5, 17.5),
-  "composer 1.5": pricingFromInput(3.5, 17.5)
+  "composer 1.5": pricingFromInput(3.5, 17.5),
+  // OpenAI GPT-5 family (used by `codex exec`). cache-read = 10% of input;
+  // cache-write uses pricingFromInput's 1.25x default (OpenAI doesn't publish a tier).
+  "gpt-5-mini": pricingFromInput(0.25, 2),
+  "gpt-5-nano": pricingFromInput(0.05, 0.4),
+  "gpt-5": pricingFromInput(1.25, 10),
+  // GPT-5.5 (latest frontier). Tiered: up to 272k total prompt tokens it's
+  // $5/$0.50/$30 per M; long-context tier is $10/$1/$45 per M. Pro variant
+  // ($30/$180) is treated as a separate slug ('gpt-5.5-pro').
+  "gpt-5.5": pricingWithLongContext(5, 30, 272e3, 10, 45),
+  // GPT-5.4 (codex 0.128 default frontier). Tiered: up to 272k total prompt
+  // tokens $2.50/$0.25/$15; above 272k doubles to $5/$0.50/$22.50 per M.
+  "gpt-5.4": pricingWithLongContext(2.5, 15, 272e3, 5, 22.5),
+  // Per OpenAI public rate card 2026-04: gpt-5.4-mini is $0.75/$4.50 per M
+  // (not $0.25/$2 like the older draft). Cache-read 10% of input via
+  // pricingFromInput's default ratio.
+  "gpt-5.4-mini": pricingFromInput(0.75, 4.5),
+  "gpt-5.4-nano": pricingFromInput(0.2, 1.25),
+  "gpt-5.3-codex": pricingFromInput(1.25, 10)
 };
 var DEFAULT_PRICING = pricingFromInput(3, 15);
+var MODEL_PRICING_KEYS_LONGEST_FIRST = Object.keys(MODEL_PRICING).sort((a6, b7) => b7.length - a6.length);
 function getModelPricing(model) {
   if (model == null) return DEFAULT_PRICING;
   const lower = model.toLowerCase();
   if (MODEL_PRICING[lower] != null) return MODEL_PRICING[lower];
-  for (const [key, pricing] of Object.entries(MODEL_PRICING)) {
-    if (lower.includes(key)) return pricing;
+  for (const key of MODEL_PRICING_KEYS_LONGEST_FIRST) {
+    if (lower.includes(key)) return MODEL_PRICING[key];
   }
   return DEFAULT_PRICING;
 }
@@ -29214,7 +29268,7 @@ async function* streamTranscriptMessages(sessionJsonlFilePath, options) {
           if (offsetToMessageId && line.includes(offsetToMessageId)) {
             try {
               const parsed = JSON.parse(line);
-              if ("uuid" in parsed && parsed.uuid === offsetToMessageId) {
+              if (parsed != null && typeof parsed === "object" && "uuid" in parsed && parsed.uuid === offsetToMessageId) {
                 offsetAnchorFound = true;
                 if (skipCount === 0) {
                   yield [parsed, line, isLastLine];

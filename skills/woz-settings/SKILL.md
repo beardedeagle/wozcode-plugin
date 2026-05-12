@@ -40,6 +40,8 @@ Where `<key>` is a setting name and `<value>` is `true` or `false`.
 | `statusLineShare` | `true` | Show /woz-share referral hint in status line |
 | `spinnerVerbs` | `true` | WOZ-themed spinner verbs |
 | `alwaysLoadTools` | `true` | Load WOZCODE MCP tools up-front instead of deferring them behind ToolSearch |
+| `userEnabled` | `true` | Master plugin on/off. When `false`, pins `settings.agent` to `woz:code-free` (native Claude tools available, WOZCODE MCP disallowed). Same toggle as the desktop tray's "WOZCODE plugin: ON/OFF". |
+| `showInMenuBar` | `true` | Whether the macOS menu-bar tray launches at login. Setting to `true` from the CLI re-launches the tray immediately. Setting to `false` unregisters the LaunchAgent; the running tray keeps going until quit. |
 
 ### About `alwaysLoadTools`
 

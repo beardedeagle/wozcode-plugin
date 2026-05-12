@@ -5,36 +5,28 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if command -v node >/dev/null 2>&1; then node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/session-start-hook.js; else echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"ACTION REQUIRED: The WozCode plugin requires Node.js but it is NOT installed or NOT in PATH. IMPORTANT: You MUST immediately inform the user that Node.js >= 20.11 is required. Direct them to install it from https://nodejs.org/ and restart Claude Code. Do NOT proceed with any other task until you have communicated this to the user.\"}}'; fi"
+            "command": "node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/session-hook.js"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/session-hook.js"
           }
         ]
       }
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/tool-redirect-hook.js"
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__plugin_woz_code__Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/tool-redirect-hook.js"
-          }
-        ]
-      },
-      {
-        "matcher": "Agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/tool-redirect-hook.js"
+            "command": "node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/session-hook.js"
           }
         ]
       }
@@ -81,6 +73,16 @@
         ]
       }
     ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/session-hook.js"
+          }
+        ]
+      }
+    ],
     "PreCompact": [
       {
         "matcher": "",
@@ -94,7 +96,6 @@
     ],
     "PostCompact": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
