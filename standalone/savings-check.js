@@ -13868,13 +13868,17 @@ var SubscriptionStatusSchema = external_exports.object({
   activeBonuses: external_exports.array(WozcodeActiveBonusSchema).nullish().transform((v2) => v2 ?? void 0),
   memberCount: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
   resetAt: external_exports.string().nullish().transform((v2) => v2 ?? void 0),
+  minimumPluginVersion: external_exports.string().nullish().transform((v2) => {
+    const trimmed = v2?.trim();
+    return trimmed != null && trimmed.length > 0 ? trimmed : void 0;
+  }),
   upgradeUrl: external_exports.string().nullish().transform((v2) => v2 ?? void 0)
 });
 
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.65",
+  version: "0.3.66",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
