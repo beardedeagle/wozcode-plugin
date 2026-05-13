@@ -13833,52 +13833,10 @@ function date4(params) {
 // node_modules/zod/v4/classic/external.js
 config(en_default());
 
-// src/common/config/auth-types.ts
-var ReferralCodeResponseSchema = external_exports.object({
-  code: external_exports.string(),
-  timesRedeemed: external_exports.number(),
-  creditBalanceCents: external_exports.number()
-});
-var WozcodeActiveBonusSchema = external_exports.object({
-  id: external_exports.string(),
-  amountInUsd: external_exports.number(),
-  kind: external_exports.string(),
-  reason: external_exports.string(),
-  endsAt: external_exports.string().nullish().transform((v2) => v2 ?? void 0)
-});
-var SubscriptionStatusSchema = external_exports.object({
-  isValid: external_exports.boolean(),
-  message: external_exports.string().nullish().transform((v2) => v2 ?? void 0),
-  // Unknown values silently become undefined (forward-compat). Case-insensitive match is
-  // defensive against transient backend drift or old-payload replay from cached credentials.
-  plan: external_exports.string().nullish().transform((v2) => {
-    const upper = v2?.toUpperCase();
-    if (upper === "INDIVIDUAL" || upper === "ORG") return upper;
-    return void 0;
-  }),
-  status: external_exports.string().nullish().transform((v2) => {
-    const upper = v2?.toUpperCase();
-    if (upper === "FREE" || upper === "PAID") return upper;
-    return void 0;
-  }),
-  monthlySavingsInUsd: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
-  monthlyBaseLimitInUsd: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
-  monthlyBonusInUsd: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
-  monthlyLimitInUsd: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
-  activeBonuses: external_exports.array(WozcodeActiveBonusSchema).nullish().transform((v2) => v2 ?? void 0),
-  memberCount: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
-  resetAt: external_exports.string().nullish().transform((v2) => v2 ?? void 0),
-  minimumPluginVersion: external_exports.string().nullish().transform((v2) => {
-    const trimmed = v2?.trim();
-    return trimmed != null && trimmed.length > 0 ? trimmed : void 0;
-  }),
-  upgradeUrl: external_exports.string().nullish().transform((v2) => v2 ?? void 0)
-});
-
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.66",
+  version: "0.3.67",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -13980,6 +13938,48 @@ var WOZCODE_BRAND_NAME = "WOZCODE";
 var WOZ_DESKTOP_DOWNLOAD_URL_TEMPLATE = `https://github.com/${WOZ_MARKETPLACE_GITHUB_REPO}/releases/download/v{version}/${WOZCODE_BRAND_NAME}-darwin-{arch}.zip`;
 var WOZ_DESKTOP_APP_NAME = WOZCODE_BRAND_NAME;
 var WOZ_DESKTOP_BUNDLE_NAME = `${WOZ_DESKTOP_APP_NAME}.app`;
+
+// src/common/config/auth-types.ts
+var ReferralCodeResponseSchema = external_exports.object({
+  code: external_exports.string(),
+  timesRedeemed: external_exports.number(),
+  creditBalanceCents: external_exports.number()
+});
+var WozcodeActiveBonusSchema = external_exports.object({
+  id: external_exports.string(),
+  amountInUsd: external_exports.number(),
+  kind: external_exports.string(),
+  reason: external_exports.string(),
+  endsAt: external_exports.string().nullish().transform((v2) => v2 ?? void 0)
+});
+var SubscriptionStatusSchema = external_exports.object({
+  isValid: external_exports.boolean(),
+  message: external_exports.string().nullish().transform((v2) => v2 ?? void 0),
+  // Unknown values silently become undefined (forward-compat). Case-insensitive match is
+  // defensive against transient backend drift or old-payload replay from cached credentials.
+  plan: external_exports.string().nullish().transform((v2) => {
+    const upper = v2?.toUpperCase();
+    if (upper === "INDIVIDUAL" || upper === "ORG") return upper;
+    return void 0;
+  }),
+  status: external_exports.string().nullish().transform((v2) => {
+    const upper = v2?.toUpperCase();
+    if (upper === "FREE" || upper === "PAID") return upper;
+    return void 0;
+  }),
+  monthlySavingsInUsd: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
+  monthlyBaseLimitInUsd: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
+  monthlyBonusInUsd: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
+  monthlyLimitInUsd: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
+  activeBonuses: external_exports.array(WozcodeActiveBonusSchema).nullish().transform((v2) => v2 ?? void 0),
+  memberCount: external_exports.number().nullish().transform((v2) => v2 ?? void 0),
+  resetAt: external_exports.string().nullish().transform((v2) => v2 ?? void 0),
+  minimumPluginVersion: external_exports.string().nullish().transform((v2) => {
+    const trimmed = v2?.trim();
+    return trimmed != null && trimmed.length > 0 ? trimmed : void 0;
+  }),
+  upgradeUrl: external_exports.string().nullish().transform((v2) => v2 ?? void 0)
+});
 
 // src/common/pricing/model-pricing.ts
 var CONTEXT_GROWTH_MULTIPLIER = 1.3;
