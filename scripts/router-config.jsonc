@@ -1,16 +1,8 @@
 {
-  // Bundled defaults. Entries here are only applied for ids/labels not already
-  // present in ~/.woz/router-config.jsonc (user file wins).
+  // Bundled defaults. User entries in ~/.woz/router-config.jsonc override
+  // by id/label.
 
-  // Top-level Claude Code fallback. Used when `wozcode router start` is
-  // invoked without a target argument: the daemon dials this preset instead
-  // of leaving ANTHROPIC_BASE_URL pointing at the bare router URL. The
-  // `/claudecode` preset is the dedicated Claude Code home base — it
-  // forwards inbound auth headers to api.anthropic.com (passThroughAuth:
-  // true) and carries Claude Code's bare-tier `modelMappings`
-  // (opus/sonnet/haiku) so out-of-the-box `wozcode router start` works with
-  // the user's own ANTHROPIC_API_KEY. The separate `/anthropic` preset
-  // below is the generic Anthropic passthrough for non-Claude-Code clients.
+  // Routing preset Claude Code dials by default.
   "claudecode": {
     "preset": "/claudecode"
   },
@@ -28,24 +20,14 @@
       "backend": "openai-native",
       "baseUrl": "https://api.openai.com/v1/",
       "apiKey": "${OPENAI_API_KEY}",
-      // Provider-level claudecode: presence of this block opts every binding
-      // under the provider into Claude Code's `/model` picker. The single
-      // Claude Code URL is the top-level `claudecode.preset` — picking a
-      // binding only nudges the per-process env layer (via direct slash
-      // dispatch on the `<provider>/<providerModel>` model name in the
-      // request body). `${CLAUDE_CODE_TARGET_MODEL}` is substituted at
-      // `wozcode router start|use <target>` time with that same prefixed
-      // form, so subagent dispatch stays on the picked model and lands cost
-      // lookups unambiguously. The default keeps a sensible fallback for
-      // provider-only targets like `wozcode router use openai`.
+      // Map Claude tier slugs to OpenAI models for subagent dispatch.
+      "modelMappings": [
+        { "model": "*haiku*", "target": "gpt-5.4-mini" },
+        { "model": "*sonnet*", "target": "gpt-5.4" },
+        { "model": "*opus*", "target": "gpt-5.5" }
+      ],
       "claudecode": {
-        "expose": true,
-        "env": {
-          "ANTHROPIC_DEFAULT_OPUS_MODEL": "${ANTHROPIC_DEFAULT_OPUS_MODEL:-openai/gpt-5.5}",
-          "ANTHROPIC_DEFAULT_SONNET_MODEL": "${ANTHROPIC_DEFAULT_SONNET_MODEL:-openai/gpt-5.4}",
-          "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${ANTHROPIC_DEFAULT_HAIKU_MODEL:-openai/gpt-5.4-mini}",
-          "CLAUDE_CODE_SUBAGENT_MODEL": "${CLAUDE_CODE_TARGET_MODEL:-openai/gpt-5.4-mini}"
-        }
+        "expose": true
       },
       "transports": {
         "openai": {
@@ -56,18 +38,10 @@
       }
     },
     {
-      // AWS Bedrock Mantle: exposes third-party and Anthropic models via two
-      // wire formats on the same host. The OpenAI-compatible path lives at
-      // `/v1/` (Chat Completions + Responses; per-binding apiStyle picks one).
-      // The native Anthropic Messages API lives under `/anthropic/` (the
-      // `/v1/messages` suffix is appended from the inbound urlPath) and is
-      // preferred for Claude models — used by the Opus 4.7 binding below.
+      // AWS Bedrock Mantle. Serves OpenAI-compatible endpoints at `/v1/` and
+      // the native Anthropic Messages API at `/anthropic/`.
       "id": "bedrock-mantle",
       "backend": "bedrock-mantle",
-      // Top-level baseUrl is the OpenAI-transport view (`/v1/` since the
-      // gateway serves OpenAI-compatible endpoints at `/v1/chat/completions`
-      // and `/v1/responses`). The anthropic transport overrides this below
-      // because the native Messages API lives under `/anthropic/` instead.
       "baseUrl": "https://bedrock-mantle.${AWS_REGION}.api.aws/v1/",
       "awsRegion": "${AWS_REGION}",
       // "awsProfile": "default",
@@ -81,19 +55,9 @@
         },
         "anthropic": {
           "baseUrl": "https://bedrock-mantle.${AWS_REGION}.api.aws/anthropic/",
-          // Bedrock-Mantle's `/anthropic/v1/messages` endpoint rejects requests
-          // whose `anthropic-beta` list contains a flag it doesn't implement
-          // (HTTP 400 "invalid beta flag"). Claude Code currently sends a
-          // half-dozen flags; strip the ones bedrock-mantle hasn't picked up
-          // yet so the request goes through. Add or remove entries as the
-          // gateway adds support.
-          //
-          // Stripping `context-management-2025-06-27` from the beta header
-          // also requires removing the matching top-level `context_management`
-          // field from the body — Claude Code injects it whenever it has the
-          // beta enabled, and bedrock-mantle's strict input validation rejects
-          // it with `Extra inputs are not permitted` if the field is present
-          // without the corresponding beta flag.
+          // Strip `anthropic-beta` flags the gateway doesn't accept. Stripping
+          // `context-management-2025-06-27` also requires removing the matching
+          // `context_management` body field.
           "requestModifications": [
             {
               "headers": {
@@ -119,22 +83,14 @@
       "baseUrl": "https://${FOUNDRY_RESOURCE_NAME}.openai.azure.com/openai/v1/",
       "apiKey": "${FOUNDRY_PROJECT_API_KEY}",
       "timeoutInMs": 120000,
-      // Tier-slug env vars steer Claude Code's bare `opus`/`sonnet`/`haiku`
-      // references onto Foundry deployment names via direct-slash dispatch.
-      // Setting these (rather than relying on the `/claudecode-azure` preset's
-      // `modelMappings`) means Claude Code substitutes the prefixed model name
-      // BEFORE issuing the request, so the transcript records the actual
-      // provider model and cost lookup lands on the right catalog entry.
-      // Values are Foundry deployment names (organization-specific) — keep
-      // them in sync with the bindings below if deployments are renamed.
+      // Map Claude tier slugs to Azure Foundry deployment names.
+      "modelMappings": [
+        { "model": "*haiku*", "target": "gpt-5.4-mini" },
+        { "model": "*sonnet*", "target": "gpt-5.4" },
+        { "model": "*opus*", "target": "gpt-5.5-1" }
+      ],
       "claudecode": {
-        "expose": true,
-        "env": {
-          "ANTHROPIC_DEFAULT_OPUS_MODEL": "${ANTHROPIC_DEFAULT_OPUS_MODEL:-azure-foundry/gpt-5.5-1}",
-          "ANTHROPIC_DEFAULT_SONNET_MODEL": "${ANTHROPIC_DEFAULT_SONNET_MODEL:-azure-foundry/gpt-5.4}",
-          "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${ANTHROPIC_DEFAULT_HAIKU_MODEL:-azure-foundry/gpt-5.4-mini}",
-          "CLAUDE_CODE_SUBAGENT_MODEL": "${CLAUDE_CODE_TARGET_MODEL:-azure-foundry/gpt-5.4-mini}"
-        }
+        "expose": true
       },
       "transports": {
         "openai": {
@@ -142,22 +98,17 @@
             "defaultReasoningEffort": "none",
             "minMaxCompletionTokens": 16
           },
-          // Steer GPT-5.x away from Claude Code's Read/Glob/Grep file tools
-          // and toward the WozCode MCP search tool. Lives on the provider so
-          // it fires for both the dedicated `/claudecode-azure` preset and
-          // direct-slash dispatch from `azure-foundry/<...>` model names
-          // landing on the top-level Claude Code URL (`/claudecode`). The
-          // `when.preset` filter scopes it to those Claude Code presets so
-          // non-Claude-Code clients (e.g. Codex CLI) hitting azure-foundry
-          // through a different preset don't pick up these instructions.
+          // Steer GPT-5.x toward the WozCode MCP search/edit tools instead of
+          // Claude Code's Read/Glob/Grep.
           "requestModifications": [
             {
               "when": {
                 "preset": ["/claudecode", "/claudecode-azure"]
               },
               "systemPrompt": {
-                "mode": "append",
-                "text": "\n\n- Batch all changes for a task into ONE mcp__plugin_woz_code__Edit call's edits[] array — not one Edit call per file. Ten edits in one call beats ten calls with one edit each.\n- Search up front, then apply edits together. Don't search-edit-search-edit.\n- Combine independent searches into one mcp__plugin_woz_code__Search call (multiple file_glob_patterns or alternation in content_regex) instead of issuing them one at a time.\n- The Edit tool's \"smallest edit\" guidance is about each edit's payload size (don't regenerate untouched lines), not about the scope of work for the task. Do everything the prompt asks for in your batched Edit call."
+                "append": [
+                  "\n\n- Batch all changes for a task into ONE mcp__plugin_woz_code__Edit call's edits[] array — not one Edit call per file. Ten edits in one call beats ten calls with one edit each.\n- Search up front, then apply edits together. Don't search-edit-search-edit.\n- Combine independent searches into one mcp__plugin_woz_code__Search call (multiple file_glob_patterns or alternation in content_regex) instead of issuing them one at a time.\n- The Edit tool's \"smallest edit\" guidance is about each edit's payload size (don't regenerate untouched lines), not about the scope of work for the task. Do everything the prompt asks for in your batched Edit call."
+                ]
               }
             }
           ]
@@ -165,91 +116,43 @@
       }
     },
     {
-      // ChatGPT subscription via the Codex CLI's OAuth login. Reuses the
-      // tokens stored at `~/.codex/auth.json` by `codex login` — we read
-      // them on every request, never spend the refresh token (Codex CLI
-      // owns refresh; spending it here would log out the user's `codex`).
-      // The gateway accepts only `/responses`, requires the Codex CLI
-      // system-prompt prefix, and rejects `max_tokens` / `metadata`.
-      //
-      // Unsanctioned by OpenAI for WozCode — the activation flow surfaces
-      // a ToS notice and requires explicit acknowledgement before use.
-      // See `src/router/docs/codex-chatgpt-oauth.md`.
+      // ChatGPT subscription via Codex CLI OAuth. Reuses tokens stored at
+      // `~/.codex/auth.json` by `codex login`.
       "id": "chatgpt",
       "backend": "chatgpt-oauth",
-      // Base URL matches the Codex CLI's ChatGPT-auth path. See upstream:
-      // https://github.com/openai/codex/blob/main/codex-rs/model-provider-info/src/lib.rs
-      // (the `"https://chatgpt.com/backend-api/codex"` branch selected when
-      // auth_mode is Chatgpt / ChatgptAuthTokens / AgentIdentity).
       "baseUrl": "https://chatgpt.com/backend-api/codex/",
       "timeoutInMs": 120000,
-      // Opts chatgpt bindings into Claude Code's `/model` picker. Tier-slug
-      // env vars steer Claude Code's bare `opus`/`sonnet`/`haiku` references
-      // (and the implicit background/subagent models) onto specific chatgpt
-      // bindings via the direct-slash dispatch — gpt-5.5 is the gateway's
-      // flagship (priority 0 in Codex's catalog), gpt-5.4 the workhorse,
-      // gpt-5.4-mini the cheapest. Subagent uses ${CLAUDE_CODE_TARGET_MODEL}
-      // so picking a specific binding via `wozcode router use chatgpt/<...>`
-      // pins subagents to that same model (matches the openai provider's pattern).
+      // Map Claude tier slugs to gateway-accepted model slugs.
+      "modelMappings": [
+        { "model": "*haiku*", "target": "gpt-5.4-mini" },
+        { "model": "*sonnet*", "target": "gpt-5.4" },
+        { "model": "*opus*", "target": "gpt-5.5" }
+      ],
       "claudecode": {
-        "expose": true,
-        "env": {
-          "ANTHROPIC_DEFAULT_OPUS_MODEL": "${ANTHROPIC_DEFAULT_OPUS_MODEL:-chatgpt/gpt-5.5}",
-          "ANTHROPIC_DEFAULT_SONNET_MODEL": "${ANTHROPIC_DEFAULT_SONNET_MODEL:-chatgpt/gpt-5.4}",
-          "ANTHROPIC_DEFAULT_HAIKU_MODEL": "${ANTHROPIC_DEFAULT_HAIKU_MODEL:-chatgpt/gpt-5.4-mini}",
-          "CLAUDE_CODE_SUBAGENT_MODEL": "${CLAUDE_CODE_TARGET_MODEL:-chatgpt/gpt-5.4-mini}"
-        }
+        "expose": true
       },
       "transports": {
         "openai": {
           "modelConfig": {
             "apiStyle": "responses"
           },
-          // The Codex CLI system-prompt prefix the gateway auth-checks against,
-          // a matching User-Agent, and the body fields the gateway rejects
-          // (`max_tokens` / `max_completion_tokens` / `metadata`). Lives on
-          // the provider so the rules fire for both the dedicated
-          // `/claudecode-chatgpt` preset and direct-slash dispatch from
-          // `chatgpt/<...>` model names landing on the top-level Claude Code
-          // URL (`/claudecode`). The `when.preset` filter scopes the rules to
-          // those Claude Code presets — if a non-Claude-Code client routes
-          // through a different preset to chatgpt, it owns its own headers
-          // and body shape. The ${CODEX_CLI_SYSTEM_PROMPT_PREFIX} placeholder
-          // is loaded at config-build time from `codex-system-prompt-prefix.ts`
-          // (single source of truth).
+          // Codex CLI fingerprint: system-prompt prefix, User-Agent, cookie
+          // jar, and body-field strips required by the ChatGPT-auth gateway.
           "requestModifications": [
             {
               "when": {
                 "preset": ["/claudecode", "/claudecode-chatgpt"]
               },
               "systemPrompt": {
-                "mode": "prepend",
-                "text": "${CODEX_CLI_SYSTEM_PROMPT_PREFIX}"
+                "prepend": ["${CODEX_CLI_SYSTEM_PROMPT_PREFIX}"]
               },
-              // Process-local Cloudflare cookie jar. chatgpt.com sits behind
-              // Cloudflare bot-management; the token-count endpoint and the
-              // follow-up `/responses` calls share `__cf_bm` / `cf_clearance`
-              // session state that must be replayed across requests or the
-              // second call gets challenged/blocked. Allowlist is hardcoded
-              // in `src/router/auth/cloudflare-cookie-jar.ts`. Scoped to
-              // claudecode presets via `when.preset` above — when codex
-              // tunnels through directly on its own preset, codex manages
-              // these cookies itself upstream of us.
               "cookieJar": "cloudflare",
               "headers": {
                 "add": {
                   "user-agent": "codex_cli_rs/0.32.0",
-                  // Codex CLI sends `originator: codex_cli_rs` on every
-                  // request — see `codex-rs/login/src/auth/default_client.rs`.
-                  // Mirror that fingerprint here.
                   "originator": "codex_cli_rs"
                 },
-                // Strip every header Claude Code emits that Codex CLI never
-                // would. The ChatGPT-account gateway is undocumented and we
-                // don't know which of these it actually inspects, but each
-                // one is an obvious tell that the request didn't come from
-                // codex_cli_rs — so remove them all. Wildcard `x-stainless-*`
-                // catches the Anthropic JS SDK fingerprinting headers.
+                // Strip headers that would tell the gateway this isn't Codex CLI.
                 "remove": ["anthropic-*", "x-app", "x-claude-code-session-id", "x-stainless-*"]
               },
               "body": {
@@ -269,28 +172,16 @@
       }
     },
     {
-      // Native Anthropic API. Targeted by the bundled `/claudecode` and
-      // `/anthropic` routing presets, both of which set `passThroughAuth: true`
-      // so the inbound x-api-key / authorization headers are forwarded to
-      // api.anthropic.com unchanged. End users can hit either preset with
-      // their own key without configuring one here.
+      // Native Anthropic API. Targeted by `/claudecode` and `/anthropic`
+      // presets, both of which forward inbound auth headers.
       "id": "anthropic",
       "baseUrl": "https://api.anthropic.com",
-      // The single Claude Code URL is the top-level `/claudecode` preset
-      // (passThroughAuth: true). No bindings declared here, so this provider
-      // is only used as the catch-all for inbound `/v1/messages` traffic that
-      // matches catalog model ids — cost lookups land on the catalog without
-      // any picker entries.
       "transports": {
         "anthropic": {}
       }
     },
     {
-      // Cursor (composer family). Pricing-only entry: WozCode's transcript
-      // scanner attributes Cursor sessions to this provider so cost lookups
-      // resolve against the catalog below. We don't route requests through
-      // here, so no `claudecode.preset` and no apiKey — the openai transport
-      // is declared because a provider must expose at least one.
+      // Cursor: pricing-only entry for cost lookups on Cursor transcripts.
       "id": "cursor",
       "baseUrl": "https://api.cursor.com/v1/",
       "transports": {
@@ -299,13 +190,9 @@
     }
   ],
   // Catalog of canonical models. Bindings reference these via `model` to
-  // inherit shared properties (driver, pricing, request modifications). One
-  // catalog entry can back many bindings (e.g. native Anthropic + Bedrock
-  // both reference `anthropic:claude-opus-4-7`). Per-model pricing lives in
-  // `src/common/pricing/pricing-table.ts` and is auto-injected at config-load
-  // time for any entry below that doesn't override `cost` inline — keeps this
-  // file lean and the standalone savings-check bundle reading from the same
-  // table without depending on the JSONC parser.
+  // inherit shared properties (driver, pricing, request modifications).
+  // Pricing is auto-injected from `src/common/pricing/pricing-table.ts` when
+  // not set inline.
   "models": [
     { "id": "moonshotai:kimi-k2.6", "driver": "moonshotai" },
     { "id": "moonshotai:kimi-k2.5", "driver": "moonshotai" },
@@ -338,18 +225,8 @@
       "model": "openai:gpt-5.5"
     },
     {
-      // ChatGPT subscription via Codex CLI OAuth. The Codex CLI prefix is
-      // injected via systemPrompt.prepend so the gateway accepts the
-      // request, and `max_tokens` / `metadata` are stripped because the
-      // upstream rejects them.
-      //
-      // Valid model slugs are sourced from Codex CLI's bundled catalog at
-      // https://github.com/openai/codex/blob/main/codex-rs/models-manager/models.json
-      // — currently `gpt-5.5` (priority 0, ChatGPT-auth default), `gpt-5.4`,
-      // and `gpt-5.4-mini`. Plain `gpt-5` and the older `gpt-5*-codex`
-      // snapshots are rejected by the ChatGPT-account gateway with
-      // "The 'gpt-5' model is not supported when using Codex with a ChatGPT
-      // account."
+      // ChatGPT subscription via Codex CLI OAuth. Valid model slugs come from
+      // Codex CLI's catalog: gpt-5.5, gpt-5.4, gpt-5.4-mini.
       "label": "GPT 5.5 (ChatGPT)",
       "provider": "chatgpt",
       "providerModel": "gpt-5.5",
@@ -395,18 +272,12 @@
     },
 
     // ----- AWS Bedrock Mantle bindings -----
-    // Reasoning-class models -> Responses API.
     {
       "label": "Opus 4.7 (Bedrock)",
       "provider": "bedrock-mantle",
       "transport": "anthropic",
-      // Bedrock-Mantle's `/anthropic/v1/messages` endpoint uses the native Anthropic
-      // model id format (no `us.`/`global.` prefix — those belong to the legacy
-      // bedrock-runtime InvokeModel API). Switch to `global.anthropic.claude-opus-4-7`
-      // for cross-region routing.
+      // Use `global.anthropic.claude-opus-4-7` for cross-region routing.
       "providerModel": "anthropic.claude-opus-4-7",
-      // Inherits pricing from the catalog so cost lookups against this binding
-      // match native Anthropic. Override `cost` here if Bedrock charges differently.
       "model": "anthropic:claude-opus-4-7"
     },
     {
@@ -513,72 +384,57 @@
         "supportsPromptCacheConfig": false
       }
     }
-    // No native-Anthropic bindings here on purpose: the catalog entries above
-    // (`anthropic:claude-opus-4-7`, etc.) are picked up automatically by the
-    // resolver when a request lands on the `anthropic` provider with a wire
-    // name matching `${catalog id after colon}`. That keeps these models out
-    // of Claude Code's `/model` picker (which would otherwise list every
-    // binding under a provider that has `claudecode.preset` set) while
-    // still enabling pricing lookup. Add an explicit binding here only when
-    // a deployment needs a cost override or its own picker entry.
+    // Native Anthropic models route via catalog id lookup on the `anthropic`
+    // provider — no explicit binding needed for pricing.
   ],
-  // Routing presets are addressable as `/router-preset<path>/v1/...`. Each
-  // preset bundles a default provider (catch-all when no binding matches) and
-  // optional name mappings. Multiple presets may target the same provider
-  // with different mappings — the URL `path` distinguishes them. Multi-segment
-  // paths like `/clients/foo/bedrock` work for namespacing.
+  // Routing presets addressable as `/router-preset<path>/v1/...`. Each preset
+  // bundles a default provider plus optional name mappings.
   "routingPresets": [
     {
-      // Claude Code home base. Used by the top-level `claudecode.preset` and
-      // dialed by the daemon as the single fixed `ANTHROPIC_BASE_URL` per
-      // machine. Carries the Claude-Code-idiomatic bare-tier `modelMappings`
-      // (opus/sonnet/haiku) and `passThroughAuth: true` so end users can
-      // dial it with their own ANTHROPIC_API_KEY. Provider-level
-      // requestModifications elsewhere use `when.preset: "/claudecode"` to
-      // scope to traffic coming through this preset.
+      // Claude Code home base. Forwards inbound auth to api.anthropic.com.
       "path": "/claudecode",
       "defaultProvider": "anthropic",
-      // Forward inbound auth headers to api.anthropic.com so end users
-      // authenticate with their own key.
       "passThroughAuth": true,
       "modelMappings": [
         { "model": "opus", "target": "claude-opus-4-7" },
         { "model": "sonnet", "target": "claude-sonnet-4-6" },
         { "model": "haiku", "target": "claude-haiku-4-5" }
       ]
+      // "requestModifications": [
+      //   {
+      //     // Strip the `claude-code-guide` subagent entry from the Agent tool
+      //     // description so the model doesn't try to delegate to it.
+      //     "tools": {
+      //       "edit": [{ "tool": "Agent", "search": "- claude-code-guide:${*}\n" }]
+      //     },
+      //     // Strip the "report the issue at github.com/anthropics/claude-code"
+      //     // hint from the system prompt; not actionable from the router side.
+      //     "systemPrompt": {
+      //       "edit": [
+      //         {
+      //           "search": "\n${*}- To give feedback,${*}\n",
+      //           "replace": "\n"
+      //         }
+      //       ]
+      //     }
+      //   }
+      // ]
     },
     {
-      // Generic Anthropic passthrough — for non-Claude-Code clients that
-      // want to dial api.anthropic.com via the router with their own key.
-      // No tier-slug mappings (those are a Claude Code idiom and live on
-      // `/claudecode`); no Claude-Code-specific request modifications.
+      // Generic Anthropic passthrough for non-Claude-Code clients.
       "path": "/anthropic",
       "defaultProvider": "anthropic",
       "passThroughAuth": true
     },
     {
-      // Maps bare Anthropic tier slugs (haiku/sonnet/opus) emitted by
-      // Claude Code's Agent tool sub-agent dispatch onto Azure Foundry
-      // models. Without this, `resolveRequestedModel` rejects bare slugs
-      // and the request falls through to api.anthropic.com which 401s.
+      // Claude Code -> Azure Foundry. Inherits tier-slug mappings from the
+      // azure-foundry provider.
       "path": "/claudecode-azure",
-      "defaultProvider": "azure-foundry",
-      // GPT-5 system-prompt steering and tool-batching guidance lives on the
-      // azure-foundry provider's `transports.openai.requestModifications` so
-      // it fires for both this preset's catch-all dispatch and direct-slash
-      // dispatch via `azure-foundry/<...>` from the top-level Claude Code URL.
-      "modelMappings": [
-        { "model": "haiku", "target": "gpt-5.4-mini" },
-        { "model": "claude-haiku-4-5-20251001", "target": "gpt-5.4-mini" },
-        { "model": "sonnet", "target": "gpt-5.4" },
-        { "model": "claude-sonnet-4-6", "target": "gpt-5.4" },
-        { "model": "opus", "target": "gpt-5.5-1" },
-        { "model": "claude-opus-4-7", "target": "gpt-5.5-1" }
-      ]
+      "defaultProvider": "azure-foundry"
     },
     {
-      // Same Azure Foundry routing as /claudecode-azure, but removes Codex's
-      // shell-oriented apply_patch tool so WozCode's normal edit tooling wins.
+      // Azure Foundry for the Codex CLI. Removes `apply_patch` so WozCode's
+      // edit tooling wins.
       "path": "/azure-wozcode-codex",
       "defaultProvider": "azure-foundry",
       "requestModifications": [
@@ -586,37 +442,32 @@
           "tools": {
             "remove": ["apply_patch"]
           }
+        },
+        {
+          // Removing the `apply_patch` tool isn't enough: Codex also injects a
+          // verbatim block of `apply_patch` usage instructions into its system
+          // prompt, which keeps nudging the model toward a tool we just took
+          // away. Strip that whole block here.
+          // Source (verbatim text that gets injected):
+          // https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/apply-patch/apply_patch_tool_instructions.md
+          "systemPrompt": {
+            "edit": [
+              {
+                "search": "## `apply_patch`\n${**}\nshell {\"command\":[\"apply_patch\",\"*** Begin Patch\\n*** Add File: hello.txt\\n+Hello, world!\\n*** End Patch\\n\"]}\n```"
+              }
+            ]
+          }
         }
       ],
       "modelMappings": [
-        { "model": "haiku", "target": "gpt-5.4-mini" },
-        { "model": "claude-haiku-4-5-20251001", "target": "gpt-5.4-mini" },
-        { "model": "sonnet", "target": "gpt-5.4" },
-        { "model": "claude-sonnet-4-6", "target": "gpt-5.4" },
-        { "model": "opus", "target": "gpt-5.5-1" },
-        { "model": "claude-opus-4-7", "target": "gpt-5.5-1" },
-        // Codex CLI sends the raw OpenAI public slug `gpt-5.5`. Foundry's
-        // deployment name is `gpt-5.5-1`. Mapping here means the codex-runner
-        // doesn't have to hardcode a per-provider deployment-name swap.
+        // Codex CLI sends `gpt-5.5`; Foundry's deployment name is `gpt-5.5-1`.
         { "model": "gpt-5.5", "target": "gpt-5.5-1" }
       ]
     },
     {
-      // ChatGPT-OAuth preset. Maps Claude Code's bare tier slugs onto the
-      // GPT-5.x model names the gateway accepts and prepends the Codex CLI
-      // system-prompt prefix the upstream auth-checks against. `max_tokens`
-      // / `max_completion_tokens` / `metadata` are stripped because the
-      // gateway rejects them. The systemPrompt.text is loaded from
-      // `codex-system-prompt-prefix.ts` at config build time — we keep the
-      // verbatim text in code (single source of truth) rather than copy it
-      // into the JSONC.
+      // Claude Code -> ChatGPT subscription via Codex CLI OAuth.
       "path": "/claudecode-chatgpt",
       "defaultProvider": "chatgpt"
-      // Codex CLI system-prompt prefix, User-Agent override, and body-field
-      // strips live on the chatgpt provider's `transports.openai.requestModifications`
-      // so they fire for both this preset's catch-all dispatch and
-      // direct-slash dispatch via `chatgpt/<...>` from the top-level Claude
-      // Code URL.
     }
   ]
 }

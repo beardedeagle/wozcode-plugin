@@ -13836,7 +13836,7 @@ config(en_default());
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.67",
+  version: "0.3.68",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -13864,6 +13864,7 @@ var package_default = {
     compile: "tsc --noEmit",
     format: "npx prettier --write 'src/**/*.{ts,js}'",
     test: 'node --import tsx --test "src/**/*.test.ts"',
+    "pretest:integration": "npm run build:plugin",
     "test:integration": 'node --import tsx --test "src/test/integration/**/*.int-test.ts"'
   },
   author: "Woz",
@@ -13904,10 +13905,12 @@ var package_default = {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/utils": "^8.58.2",
+    "@xterm/headless": "^5.5.0",
     dotenv: "~17.4.2",
     esbuild: "^0.28.0",
     eslint: "~10.2.1",
     "javascript-obfuscator": "^5.4.1",
+    "node-pty": "^1.0.0",
     openai: "~6.34.0",
     tailwindcss: "^4.2.2",
     tsx: "~4.21.0",
@@ -14060,12 +14063,26 @@ var MODEL_PRICING = {
 };
 var DEFAULT_PRICING = pricingFromInput(3, 15);
 var MODEL_PRICING_KEYS_LONGEST_FIRST = Object.keys(MODEL_PRICING).sort((a6, b7) => b7.length - a6.length);
+function modelContainsSegment(model, candidate) {
+  let idx = 0;
+  for (; ; ) {
+    idx = model.indexOf(candidate, idx);
+    if (idx < 0) return false;
+    const before = idx === 0 ? "" : model[idx - 1];
+    const afterIdx = idx + candidate.length;
+    const after = afterIdx >= model.length ? "" : model[afterIdx];
+    const leftOk = before === "" || before === "/" || before === ":";
+    const rightOk = after === "" || after === "-" || after === "/" || after === ":";
+    if (leftOk && rightOk) return true;
+    idx++;
+  }
+}
 function getModelPricing(model) {
   if (model == null) return DEFAULT_PRICING;
   const lower = model.toLowerCase();
   if (MODEL_PRICING[lower] != null) return MODEL_PRICING[lower];
   for (const key of MODEL_PRICING_KEYS_LONGEST_FIRST) {
-    if (lower.includes(key)) return MODEL_PRICING[key];
+    if (modelContainsSegment(lower, key)) return MODEL_PRICING[key];
   }
   return DEFAULT_PRICING;
 }
