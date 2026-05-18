@@ -17,12 +17,3 @@ Prefer mcp__plugin_woz_code__Sql for database schema inspection and SQL queries.
 Use Bash only for shell-only tasks such as running a script or checking an environment variable.
 Do not edit files.
 """
-
-[mcp_servers.plugin_woz_code]
-command = "node"
-args = ["__WOZCODE_PLUGIN_DIR__/servers/code-server.js"]
-
-[mcp_servers.plugin_woz_code.env]
-WOZCODE_POSTHOG_ENABLED = "true"
-WOZCODE_POSTHOG_PROJECT_TOKEN = "phc_F3mo2emdspgzD4QmFMQxHQfab1TyXgCAU7eYBakKq9k"
-WOZCODE_POSTHOG_PROJECT_REGION = "us"

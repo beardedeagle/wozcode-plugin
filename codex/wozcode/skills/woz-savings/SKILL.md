@@ -7,7 +7,7 @@ allowed-tools: Bash(node *)
 Run the WOZCODE savings report:
 
 ```bash
-node $HOME/.codex/plugins/wozcode/scripts/savings-report.js
+node "${CODEX_HOME:-$HOME/.codex}/plugins/wozcode/scripts/savings-report.js"
 ```
 
 Relay the full output to the user. Do not summarize or modify it.

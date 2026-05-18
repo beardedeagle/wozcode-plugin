@@ -43,13 +43,13 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 // src/common/baseline/baseline-scanner.ts
 var import_child_process4 = require("child_process");
 var fs4 = __toESM(require("fs"), 1);
-var path4 = __toESM(require("path"), 1);
+var path5 = __toESM(require("path"), 1);
 
 // src/common/config/config.ts
 var fsSync = __toESM(require("fs"), 1);
 var fs2 = __toESM(require("fs/promises"), 1);
-var os2 = __toESM(require("os"), 1);
-var path2 = __toESM(require("path"), 1);
+var os3 = __toESM(require("os"), 1);
+var path3 = __toESM(require("path"), 1);
 
 // src/common/claude-env.ts
 var fs = __toESM(require("fs"), 1);
@@ -64,6 +64,16 @@ function getClaudeHomePath(useEnv = true) {
 function getProjectsPath() {
   return path.join(getClaudeHomePath(), CLAUDE_PROJECTS_DIR_NAME);
 }
+
+// src/common/codex-paths.ts
+var os2 = __toESM(require("os"), 1);
+var path2 = __toESM(require("path"), 1);
+
+// src/common/woz-host.ts
+function initialHostFromEnv() {
+  return process.env.WOZCODE_HOST === "codex" ? "codex" : "claude";
+}
+var currentHost = initialHostFromEnv();
 
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
@@ -832,10 +842,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path5) {
-  if (!path5)
+function getElementAtPath(obj, path6) {
+  if (!path6)
     return obj;
-  return path5.reduce((acc, key) => acc?.[key], obj);
+  return path6.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -1218,11 +1228,11 @@ function aborted(x2, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path5, issues) {
+function prefixIssues(path6, issues) {
   return issues.map((iss) => {
     var _a2;
     (_a2 = iss).path ?? (_a2.path = []);
-    iss.path.unshift(path5);
+    iss.path.unshift(path6);
     return iss;
   });
 }
@@ -1405,7 +1415,7 @@ function formatError(error48, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error48, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error49, path5 = []) => {
+  const processError = (error49, path6 = []) => {
     var _a2, _b2;
     for (const issue2 of error49.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
@@ -1415,7 +1425,7 @@ function treeifyError(error48, mapper = (issue2) => issue2.message) {
       } else if (issue2.code === "invalid_element") {
         processError({ issues: issue2.issues }, issue2.path);
       } else {
-        const fullpath = [...path5, ...issue2.path];
+        const fullpath = [...path6, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -1447,8 +1457,8 @@ function treeifyError(error48, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path5 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path5) {
+  const path6 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path6) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -13425,13 +13435,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path5 = ref.slice(1).split("/").filter(Boolean);
-  if (path5.length === 0) {
+  const path6 = ref.slice(1).split("/").filter(Boolean);
+  if (path6.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path5[0] === defsKey) {
-    const key = path5[1];
+  if (path6[0] === defsKey) {
+    const key = path6[1];
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -13836,7 +13846,7 @@ config(en_default());
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.69",
+  version: "0.3.70",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -13846,14 +13856,16 @@ var package_default = {
   },
   scripts: {
     build: "tsc",
-    "build:plugin:prod": "tsc && node dist/plugin/build-plugin.js",
-    "build:plugin": "tsc && node dist/plugin/build-plugin.js --no-obfuscate",
-    "build:plugin-codex:prod": "tsc && node dist/plugin/codex/build-plugin-codex.js",
-    "build:plugin-codex": "tsc && node dist/plugin/codex/build-plugin-codex.js --no-obfuscate",
-    "build:plugin-with-cowork:prod": "tsc && node dist/plugin/build-plugin.js --cowork",
-    "build:plugin-with-cowork": "tsc && node dist/plugin/build-plugin.js --no-obfuscate --cowork",
-    "build:plugin:all:prod": "tsc && node dist/plugin/build-plugin.js --cowork && node dist/plugin/codex/build-plugin-codex.js",
-    "build:plugin:all": "tsc && node dist/plugin/build-plugin.js --no-obfuscate --cowork && node dist/plugin/codex/build-plugin-codex.js --no-obfuscate",
+    "build:claude": "tsc && node dist/plugin/claude/build-plugin-claude.js --no-obfuscate",
+    "build:claude:prod": "tsc && node dist/plugin/claude/build-plugin-claude.js",
+    "build:claude:all": "tsc && node dist/plugin/claude/build-plugin-claude.js --no-obfuscate --cowork",
+    "build:claude:all:prod": "tsc && node dist/plugin/claude/build-plugin-claude.js --cowork",
+    "build:codex": "tsc && node dist/plugin/codex/build-plugin-codex.js --no-obfuscate",
+    "build:codex:prod": "tsc && node dist/plugin/codex/build-plugin-codex.js",
+    "build:plugins": "npm run build:claude:all && npm run build:codex",
+    "build:plugins:prod": "npm run build:claude:all:prod && npm run build:codex:prod",
+    "dev:codex": "npm run build:codex && node wozcode-plugin-codex/wozcode/scripts/install.js",
+    "dev:codex:remove": "node wozcode-plugin-codex/wozcode/scripts/install.js --remove",
     "build:desktop:css": "npx @tailwindcss/cli -i src/desktop/webview/input.css -o src/desktop/webview/styles.css",
     "build:desktop": "npm run build:desktop:css && bunx electrobun build && npm run patch:desktop",
     "build:desktop:release": "npm run build:desktop:css && WOZ_RELEASE_BUILD=1 bunx electrobun build --env=stable && npm run patch:desktop",
@@ -13864,7 +13876,7 @@ var package_default = {
     compile: "tsc --noEmit",
     format: "npx prettier --write 'src/**/*.{ts,js}'",
     test: 'node --import tsx --test "src/**/*.test.ts"',
-    "pretest:integration": "npm run build:plugin",
+    "pretest:integration": "npm run build:plugins && npm run build:claude:all:prod -- --for-integration-tests && npm run build:codex:prod -- --for-integration-tests",
     "test:integration": 'node --import tsx --test "src/test/integration/**/*.int-test.ts"'
   },
   author: "Woz",
@@ -13891,13 +13903,16 @@ var package_default = {
     "posthog-node": "^5.29.2",
     react: "^19.1.4",
     "react-dom": "^19.1.4",
+    "smol-toml": "^1.6.1",
     typescript: "~5.9.2",
+    "web-tree-sitter": "^0.26.8",
     yaml: "^2.8.3",
     zod: "^4.3.6"
   },
   devDependencies: {
     "@aws-sdk/client-bedrock-runtime": "~3.1032.0",
     "@aws/bedrock-token-generator": "^1.1.0",
+    "@cursorless/tree-sitter-wasms": "^0.9.0",
     "@eslint/js": "~10.0.1",
     "@smithy/types": "~4.14.1",
     "@tailwindcss/cli": "^4.2.2",

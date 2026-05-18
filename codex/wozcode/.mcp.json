@@ -1,16 +1,16 @@
 {
   "mcpServers": {
-    "code": {
+    "plugin_woz_code": {
       "command": "node",
-      "args": [
-        "./servers/code-server.js"
-      ],
+      "args": ["./servers/code-server.js"],
+      "cwd": ".",
       "env": {
+        "WOZCODE_HOST": "codex",
+        "WOZCODE_MCP_CWD_HOOK_INJECTED": "0",
         "WOZCODE_POSTHOG_ENABLED": "true",
         "WOZCODE_POSTHOG_PROJECT_TOKEN": "phc_F3mo2emdspgzD4QmFMQxHQfab1TyXgCAU7eYBakKq9k",
         "WOZCODE_POSTHOG_PROJECT_REGION": "us"
-      },
-      "cwd": "."
+      }
     }
   }
 }

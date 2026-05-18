@@ -10,10 +10,10 @@ If the user passed `--token <token>` as arguments, skip directly to the Token Lo
 
 ## Browser Login (Preferred)
 
-First try the installed WozCode login command. This opens a browser for the user to log in:
+First try the installed WOZCODE login command. This opens a browser for the user to log in:
 
 ```bash
-node $HOME/.codex/plugins/wozcode/scripts/wozcode-cli.js login
+node "${CODEX_HOME:-$HOME/.codex}/plugins/wozcode/scripts/wozcode-cli-codex.js" login
 ```
 
 If the command exits with code 0, login succeeded — confirm to the user.
@@ -35,7 +35,7 @@ Use this when:
 Once you have the token (from args or from the user), run:
 
 ```bash
-node $HOME/.codex/plugins/wozcode/scripts/wozcode-cli.js login --token '<token>'
+node "${CODEX_HOME:-$HOME/.codex}/plugins/wozcode/scripts/wozcode-cli-codex.js" login --token '<token>'
 ```
 
 If Codex blocks the installed command from running, ask the user to run this in their regular terminal outside Codex:
