@@ -55,10 +55,18 @@ var path3 = __toESM(require("path"), 1);
 var fs = __toESM(require("fs"), 1);
 var os = __toESM(require("os"), 1);
 var path = __toESM(require("path"), 1);
+
+// src/common/claude-constants.ts
+var CLAUDE_CONFIG_DIR_ENV_VAR = "CLAUDE_CONFIG_DIR";
+
+// src/common/config/env-constants.ts
+var WOZCODE_HOST_ENV_VAR = "WOZCODE_HOST";
+
+// src/common/claude-env.ts
 var CLAUDE_DIR_NAME = ".claude";
 var CLAUDE_PROJECTS_DIR_NAME = "projects";
 function getClaudeHomePath(useEnv = true) {
-  const configPath = (useEnv ? process.env.CLAUDE_CONFIG_DIR : void 0) ?? path.join(os.homedir(), CLAUDE_DIR_NAME);
+  const configPath = (useEnv ? process.env[CLAUDE_CONFIG_DIR_ENV_VAR] : void 0) ?? path.join(os.homedir(), CLAUDE_DIR_NAME);
   return configPath;
 }
 function getProjectsPath() {
@@ -71,7 +79,7 @@ var path2 = __toESM(require("path"), 1);
 
 // src/common/woz-host.ts
 function initialHostFromEnv() {
-  return process.env.WOZCODE_HOST === "codex" ? "codex" : "claude";
+  return process.env[WOZCODE_HOST_ENV_VAR] === "codex" ? "codex" : "claude";
 }
 var currentHost = initialHostFromEnv();
 
@@ -13846,13 +13854,13 @@ config(en_default());
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.70",
+  version: "0.3.71",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
   main: "dist/plugin/servers/code-stdio.js",
   bin: {
-    wozcode: "./dist/plugin/auth/wozcode-cli.js"
+    wozcode: "./dist/plugin/claude/auth/wozcode-cli.js"
   },
   scripts: {
     build: "tsc",
@@ -13864,19 +13872,20 @@ var package_default = {
     "build:codex:prod": "tsc && node dist/plugin/codex/build-plugin-codex.js",
     "build:plugins": "npm run build:claude:all && npm run build:codex",
     "build:plugins:prod": "npm run build:claude:all:prod && npm run build:codex:prod",
-    "dev:codex": "npm run build:codex && node wozcode-plugin-codex/wozcode/scripts/install.js",
-    "dev:codex:remove": "node wozcode-plugin-codex/wozcode/scripts/install.js --remove",
     "build:desktop:css": "npx @tailwindcss/cli -i src/desktop/webview/input.css -o src/desktop/webview/styles.css",
     "build:desktop": "npm run build:desktop:css && bunx electrobun build && npm run patch:desktop",
     "build:desktop:release": "npm run build:desktop:css && WOZ_RELEASE_BUILD=1 bunx electrobun build --env=stable && npm run patch:desktop",
     "patch:desktop": "tsx scripts/patch-desktop-plist.ts",
     "package:desktop": "tsx scripts/package-desktop.ts",
+    "dev:codex": "npm run build:codex && node wozcode-plugin-codex/wozcode/scripts/install.js",
+    "dev:codex:remove": "npm run build:codex && node wozcode-plugin-codex/wozcode/scripts/install.js --remove",
     "dev:desktop": "npm run build:desktop:css && bunx electrobun dev",
     lint: "npx eslint src/",
-    compile: "tsc --noEmit",
+    compile: "tsc --noEmit && tsc --noEmit -p tsconfig.webview.json",
     format: "npx prettier --write 'src/**/*.{ts,js}'",
     test: 'node --import tsx --test "src/**/*.test.ts"',
-    "pretest:integration": "npm run build:plugins && npm run build:claude:all:prod -- --for-integration-tests && npm run build:codex:prod -- --for-integration-tests",
+    "pretest:integration": "npm run build:plugins",
+    "build:integration:obfuscated": "npm run build:claude:all:prod -- --for-integration-tests && npm run build:codex:prod -- --for-integration-tests",
     "test:integration": 'node --import tsx --test "src/test/integration/**/*.int-test.ts"'
   },
   author: "Woz",
@@ -13910,10 +13919,12 @@ var package_default = {
     zod: "^4.3.6"
   },
   devDependencies: {
+    "@ampproject/remapping": "^2.3.0",
     "@aws-sdk/client-bedrock-runtime": "~3.1032.0",
     "@aws/bedrock-token-generator": "^1.1.0",
     "@cursorless/tree-sitter-wasms": "^0.9.0",
     "@eslint/js": "~10.0.1",
+    "@posthog/cli": "0.7.12",
     "@smithy/types": "~4.14.1",
     "@tailwindcss/cli": "^4.2.2",
     "@types/node": "~25.6.0",
@@ -13949,6 +13960,7 @@ var WOZCODE_CLI_WRAPPER_NAME = WOZCODE_CLI_NAME;
 var WOZCODE_CLI_WRAPPER_FILENAME_WIN = `${WOZCODE_CLI_WRAPPER_NAME}.cmd`;
 var ROUTER_DAEMON_SCRIPT_KEY = "router-daemon";
 var ROUTER_DAEMON_SCRIPT_NAME = `${ROUTER_DAEMON_SCRIPT_KEY}.js`;
+var ROUTER_DAEMON_SOURCE_REL = `router/${ROUTER_DAEMON_SCRIPT_KEY}.ts`;
 var MCP_PLUGIN_PREFIX = "mcp__plugin_woz_code__";
 var WOZ_MARKETPLACE_GITHUB_REPO = "WithWoz/wozcode-plugin";
 var WOZ_MARKETPLACE_PLUGIN_JSON_URL = `https://raw.githubusercontent.com/${WOZ_MARKETPLACE_GITHUB_REPO}/main/.claude-plugin/plugin.json`;
@@ -29861,8 +29873,7 @@ async function scanAndFilter(file2) {
   }
 }
 
-// src/plugin/savings-check-standalone.ts
-var LAST_MONTH_DAYS = 30;
+// src/plugin/claude/savings-check-standalone.ts
 var MAX_SESSIONS_TO_SCAN = 5e3;
 var BRAND = "\u{1F9D9} WOZCODE";
 var GREEN = "\x1B[38;2;90;158;31m";
@@ -29901,33 +29912,21 @@ async function main() {
   }
   const vanilla = results;
   console.log(`${DIM}Analyzed ${results.length} sessions.${RESET}`);
-  const lastMonthCutoffMs = nowMs - LAST_MONTH_DAYS * 864e5;
-  const lastMonthResults = vanilla.filter((r2) => r2.mtimeMs >= lastMonthCutoffMs);
-  const lastMonthEstimate = aggregateSessions(lastMonthResults, LAST_MONTH_DAYS, nowMs);
-  const oldestMs = vanilla.length > 0 ? vanilla.reduce((m10, r2) => Math.min(m10, r2.mtimeMs), Infinity) : nowMs;
+  const oldestMs = vanilla.reduce((m10, r2) => Math.min(m10, r2.mtimeMs), Infinity);
+  const newestMs = vanilla.reduce((m10, r2) => Math.max(m10, r2.mtimeMs), -Infinity);
   const lifetimeWindowDays = Math.max(1, Math.ceil((nowMs - oldestMs) / 864e5));
   const lifetimeEstimate = aggregateSessions(vanilla, lifetimeWindowDays, nowMs);
-  const lastMonthRange = lastMonthResults.length > 0 ? {
-    fromMs: lastMonthResults.reduce((m10, r2) => Math.min(m10, r2.mtimeMs), Infinity),
-    toMs: lastMonthResults.reduce((m10, r2) => Math.max(m10, r2.mtimeMs), -Infinity)
-  } : void 0;
-  const newestMs = vanilla.length > 0 ? vanilla.reduce((m10, r2) => Math.max(m10, r2.mtimeMs), -Infinity) : nowMs;
-  const lifetimeRange = vanilla.length > 0 ? { fromMs: oldestMs, toMs: newestMs } : void 0;
+  const lifetimeRange = { fromMs: oldestMs, toMs: newestMs };
   const hitLifetimeCap = vanilla.length >= MAX_SESSIONS_TO_SCAN;
-  const showLifetime = vanilla.length > lastMonthResults.length;
   console.log();
-  printSection(showLifetime ? "LAST 30 DAYS" : "YOUR USAGE", lastMonthEstimate, lastMonthRange);
-  if (showLifetime) {
-    console.log();
-    printSection("LIFETIME", lifetimeEstimate, lifetimeRange);
-    if (hitLifetimeCap) {
-      console.log(
-        `  ${DIM}(capped at the ${MAX_SESSIONS_TO_SCAN} most-recent vanilla sessions \u2014 older sessions excluded)${RESET}`
-      );
-    }
+  printSection("YOUR USAGE \u2014 ALL TIME", lifetimeEstimate, lifetimeRange);
+  if (hitLifetimeCap) {
+    console.log(
+      `  ${DIM}(capped at the ${MAX_SESSIONS_TO_SCAN} most-recent vanilla sessions \u2014 older sessions excluded)${RESET}`
+    );
   }
   console.log();
-  printInstallFooter(lastMonthEstimate, lifetimeEstimate);
+  printInstallFooter(lifetimeEstimate);
 }
 function printSection(title, e2, dateRange) {
   console.log(`${DIM}${DIVIDER}${RESET}`);
@@ -29937,9 +29936,7 @@ function printSection(title, e2, dateRange) {
     console.log(`  ${DIM}No vanilla Claude Code sessions in this window.${RESET}`);
     return;
   }
-  if (dateRange != null) {
-    console.log(`  Date range:         ${formatDate(dateRange.fromMs)} \u2192 ${formatDate(dateRange.toMs)}`);
-  }
+  console.log(`  Date range:         ${formatDate(dateRange.fromMs)} \u2192 ${formatDate(dateRange.toMs)}`);
   console.log(`  Sessions analyzed:  ${e2.vanillaSessions}`);
   console.log(`  Turns:              ${e2.vanillaUsage.turnCount.toLocaleString()}`);
   console.log(`  Cost spent:         ${formatCost(e2.totalVanillaCostInUsd)}`);
@@ -29968,30 +29965,23 @@ function printSection(title, e2, dateRange) {
     }
   }
 }
-function printInstallFooter(lastMonth, lifetime) {
+function printInstallFooter(lifetime) {
   console.log(`${DIM}${DIVIDER}${RESET}`);
   console.log();
-  const lastMonthSaved = lastMonth.rawDetected.costSavedInUsd;
-  const lastMonthTime = lastMonth.rawDetected.timeSavedInMs;
   const lifetimeSaved = lifetime.rawDetected.costSavedInUsd;
   const lifetimeTime = lifetime.rawDetected.timeSavedInMs;
-  if (lastMonthSaved >= 1) {
-    const amt = formatCost(lastMonthSaved);
-    const dur = formatDuration(lastMonthTime);
-    console.log(`  \u{1F9D9}  You just spent ${GREEN}${amt}${RESET} you didn't have to spend.`);
-    console.log(`      And waited ${GREEN}${dur}${RESET} you didn't have to wait.`);
-    console.log();
-    console.log(`      ${BOLD}Don't do it twice.${RESET}`);
-  } else if (lifetimeSaved >= 1) {
+  if (lifetimeSaved >= 1) {
     const amt = formatCost(lifetimeSaved);
     const dur = formatDuration(lifetimeTime);
-    console.log(`  \u{1F9D9}  Your Claude Code history has ${GREEN}${amt}${RESET} and ${GREEN}${dur}${RESET}`);
-    console.log(`      of savings you missed.`);
+    console.log(
+      `  \u{1F9D9}  Across your Claude Code history you spent ${GREEN}${amt}${RESET} you didn't have to spend.`
+    );
+    console.log(`      And waited ${GREEN}${dur}${RESET} you didn't have to wait.`);
     console.log();
-    console.log(`      ${BOLD}The next batch is still yours to grab.${RESET}`);
+    console.log(`      ${BOLD}Don't do it again.${RESET}`);
   } else {
-    console.log(`  \u{1F9D9}  No batchable savings detected today \u2014 but install now,`);
-    console.log(`      and we'll start tracking what you save from here on out.`);
+    console.log(`  \u{1F9D9}  No batchable savings detected in your Claude Code history \u2014 but install`);
+    console.log(`      now, and we'll start tracking what you save from here on out.`);
   }
   console.log();
   console.log(`  ${BOLD}\u2192${RESET}   Create your account:  ${CYAN}https://wozcode.com?ref=savings-check${RESET}`);

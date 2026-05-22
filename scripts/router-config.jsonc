@@ -391,6 +391,12 @@
   // bundles a default provider plus optional name mappings.
   "routingPresets": [
     {
+      // Generic Anthropic passthrough for non-Claude-Code clients.
+      "path": "/anthropic",
+      "defaultProvider": "anthropic",
+      "passThroughAuth": true
+    },
+    {
       // Claude Code home base. Forwards inbound auth to api.anthropic.com.
       "path": "/claudecode",
       "defaultProvider": "anthropic",
@@ -421,10 +427,9 @@
       // ]
     },
     {
-      // Generic Anthropic passthrough for non-Claude-Code clients.
-      "path": "/anthropic",
-      "defaultProvider": "anthropic",
-      "passThroughAuth": true
+      // Claude Code -> ChatGPT subscription via Codex CLI OAuth.
+      "path": "/claudecode-chatgpt",
+      "defaultProvider": "chatgpt"
     },
     {
       // Claude Code -> Azure Foundry. Inherits tier-slug mappings from the
@@ -433,10 +438,43 @@
       "defaultProvider": "azure-foundry"
     },
     {
+      // OpenAI direct for the Codex CLI. Same tool-stripping and prompt
+      // rewrites as /codex-azure; only the upstream provider differs.
+      "path": "/codex",
+      "defaultProvider": "openai",
+      "requestModifications": [
+        {
+          "tools": {
+            "remove": ["apply_patch", "view_image"]
+          }
+        },
+        {
+          "systemPrompt": {
+            "append": [
+              "\n\n- Batch all changes for a task into ONE mcp__plugin_woz_code__Edit call's edits[] array — not one Edit call per file. Ten edits in one call beats ten calls with one edit each.\n- Search up front, then apply edits together. Don't search-edit-search-edit.\n- Combine independent searches into one mcp__plugin_woz_code__Search call (multiple file_glob_patterns or alternation in content_regex) instead of issuing them one at a time.\n- The Edit tool's \"smallest edit\" guidance is about each edit's payload size (don't regenerate untouched lines), not about the scope of work for the task. Do everything the prompt asks for in your batched Edit call."
+            ],
+            "edit": [
+              {
+                "search": "- When you search for text or files, you reach first for `rg`${**}- You parallelize tool calls whenever you can, especially file reads such as `cat`, `rg`, `sed`, `ls`, `${*}\n",
+                "replace": "- When you search for text, discover files, or read file contents, use mcp__plugin_woz_code__Search instead of shell commands such as `rg`, `grep`, `cat`, `sed`, or `ls`.\n- Parallelize independent tool calls when possible, but prefer one combined mcp__plugin_woz_code__Search call for related file discovery, grep-style searches, and reads.\n"
+              },
+              {
+                "search": "- Use `apply_patch` for manual code edits.${**}- Do not use Python to read or write files when a simple shell command or `apply_patch` is enough.\n",
+                "replace": "- Use mcp__plugin_woz_code__Edit for manual code edits, file creation, and search/replace changes. Batch all changes for a task into one Edit call's edits[] array.\n- Do not use `apply_patch`, `cat`, heredocs, Python scripts, or other shell write tricks to create or edit files when mcp__plugin_woz_code__Edit can do it.\n"
+              },
+              {
+                "search": "## `apply_patch`\n${**}\nshell {\"command\":[\"apply_patch\",\"*** Begin Patch\\n*** Add File: hello.txt\\n+Hello, world!\\n*** End Patch\\n\"]}\n```"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
       // Azure Foundry for the Codex CLI. Steers Codex away from built-in
       // patch/image tools and shell file-inspection commands so WozCode's MCP
       // search/edit tooling wins.
-      "path": "/azure-wozcode-codex",
+      "path": "/codex-azure",
       "defaultProvider": "azure-foundry",
       "requestModifications": [
         {
@@ -469,11 +507,6 @@
         // Codex CLI sends `gpt-5.5`; Foundry's deployment name is `gpt-5.5-1`.
         { "model": "gpt-5.5", "target": "gpt-5.5-1" }
       ]
-    },
-    {
-      // Claude Code -> ChatGPT subscription via Codex CLI OAuth.
-      "path": "/claudecode-chatgpt",
-      "defaultProvider": "chatgpt"
     }
   ]
 }
