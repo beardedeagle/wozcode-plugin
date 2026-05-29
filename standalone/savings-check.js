@@ -41,15 +41,15 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 
 // src/common/baseline/baseline-scanner.ts
-var import_child_process4 = require("child_process");
-var fs4 = __toESM(require("fs"), 1);
-var path5 = __toESM(require("path"), 1);
+var import_child_process5 = require("child_process");
+var fs5 = __toESM(require("fs"), 1);
+var path6 = __toESM(require("path"), 1);
 
 // src/common/config/config.ts
 var fsSync = __toESM(require("fs"), 1);
-var fs2 = __toESM(require("fs/promises"), 1);
-var os3 = __toESM(require("os"), 1);
-var path3 = __toESM(require("path"), 1);
+var fs3 = __toESM(require("fs/promises"), 1);
+var os4 = __toESM(require("os"), 1);
+var path4 = __toESM(require("path"), 1);
 
 // src/common/claude-env.ts
 var fs = __toESM(require("fs"), 1);
@@ -82,6 +82,12 @@ function initialHostFromEnv() {
   return process.env[WOZCODE_HOST_ENV_VAR] === "codex" ? "codex" : "claude";
 }
 var currentHost = initialHostFromEnv();
+
+// src/common/wozcore/utils/file-concurrency-utils.ts
+var import_child_process = require("child_process");
+var fs2 = __toESM(require("fs"), 1);
+var os3 = __toESM(require("os"), 1);
+var path3 = __toESM(require("path"), 1);
 
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
@@ -850,15 +856,15 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path6) {
-  if (!path6)
+function getElementAtPath(obj, path7) {
+  if (!path7)
     return obj;
-  return path6.reduce((acc, key) => acc?.[key], obj);
+  return path7.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
-  const promises4 = keys.map((key) => promisesObj[key]);
-  return Promise.all(promises4).then((results) => {
+  const promises5 = keys.map((key) => promisesObj[key]);
+  return Promise.all(promises5).then((results) => {
     const resolvedObj = {};
     for (let i2 = 0; i2 < keys.length; i2++) {
       resolvedObj[keys[i2]] = results[i2];
@@ -1236,11 +1242,11 @@ function aborted(x2, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path6, issues) {
+function prefixIssues(path7, issues) {
   return issues.map((iss) => {
     var _a2;
     (_a2 = iss).path ?? (_a2.path = []);
-    iss.path.unshift(path6);
+    iss.path.unshift(path7);
     return iss;
   });
 }
@@ -1423,7 +1429,7 @@ function formatError(error48, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error48, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error49, path6 = []) => {
+  const processError = (error49, path7 = []) => {
     var _a2, _b2;
     for (const issue2 of error49.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
@@ -1433,7 +1439,7 @@ function treeifyError(error48, mapper = (issue2) => issue2.message) {
       } else if (issue2.code === "invalid_element") {
         processError({ issues: issue2.issues }, issue2.path);
       } else {
-        const fullpath = [...path6, ...issue2.path];
+        const fullpath = [...path7, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -1465,8 +1471,8 @@ function treeifyError(error48, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path6 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path6) {
+  const path7 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path7) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -13443,13 +13449,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path6 = ref.slice(1).split("/").filter(Boolean);
-  if (path6.length === 0) {
+  const path7 = ref.slice(1).split("/").filter(Boolean);
+  if (path7.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path6[0] === defsKey) {
-    const key = path6[1];
+  if (path7[0] === defsKey) {
+    const key = path7[1];
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -13851,10 +13857,20 @@ function date4(params) {
 // node_modules/zod/v4/classic/external.js
 config(en_default());
 
+// src/common/wozcore/utils/file-concurrency-utils.ts
+var FileLockInfoSchema = external_exports.object({
+  pid: external_exports.number(),
+  lockAcquiredAtMs: external_exports.number(),
+  hostname: external_exports.string(),
+  processName: external_exports.string().optional(),
+  // start time of process if available, read from the process table
+  processStartAtMs: external_exports.number().optional()
+});
+
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.71",
+  version: "0.3.72",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -13963,7 +13979,8 @@ var ROUTER_DAEMON_SCRIPT_NAME = `${ROUTER_DAEMON_SCRIPT_KEY}.js`;
 var ROUTER_DAEMON_SOURCE_REL = `router/${ROUTER_DAEMON_SCRIPT_KEY}.ts`;
 var MCP_PLUGIN_PREFIX = "mcp__plugin_woz_code__";
 var WOZ_MARKETPLACE_GITHUB_REPO = "WithWoz/wozcode-plugin";
-var WOZ_MARKETPLACE_PLUGIN_JSON_URL = `https://raw.githubusercontent.com/${WOZ_MARKETPLACE_GITHUB_REPO}/main/.claude-plugin/plugin.json`;
+var PLUGIN_METADATA_DIR_NAME = ".claude-plugin";
+var WOZ_MARKETPLACE_PLUGIN_JSON_URL = `https://raw.githubusercontent.com/${WOZ_MARKETPLACE_GITHUB_REPO}/main/${PLUGIN_METADATA_DIR_NAME}/plugin.json`;
 var WOZCODE_BRAND_NAME = "WOZCODE";
 var WOZ_DESKTOP_DOWNLOAD_URL_TEMPLATE = `https://github.com/${WOZ_MARKETPLACE_GITHUB_REPO}/releases/download/v{version}/${WOZCODE_BRAND_NAME}-darwin-{arch}.zip`;
 var WOZ_DESKTOP_APP_NAME = WOZCODE_BRAND_NAME;
@@ -14147,12 +14164,12 @@ function addSavings(target, source) {
 }
 
 // src/common/wozcore/session-transcripts.ts
-var fs3 = __toESM(require("fs"), 1);
+var fs4 = __toESM(require("fs"), 1);
 var import_path10 = __toESM(require("path"), 1);
 var import_readline3 = __toESM(require("readline"), 1);
 
 // node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs
-var import_child_process = require("child_process");
+var import_child_process2 = require("child_process");
 var import_crypto = require("crypto");
 var import_fs = require("fs");
 var import_promises = require("fs/promises");
@@ -14162,7 +14179,7 @@ var import_path = require("path");
 var import_readline = require("readline");
 var import_url = require("url");
 var import_events = require("events");
-var import_child_process2 = require("child_process");
+var import_child_process3 = require("child_process");
 var import_readline2 = require("readline");
 var import_os2 = require("os");
 var import_path2 = require("path");
@@ -14183,7 +14200,7 @@ var import_events2 = require("events");
 var import_fs3 = require("fs");
 var import_promises6 = require("fs/promises");
 var import_path5 = require("path");
-var import_child_process3 = require("child_process");
+var import_child_process4 = require("child_process");
 var import_util3 = require("util");
 var import_promises7 = require("fs/promises");
 var import_path6 = require("path");
@@ -21623,7 +21640,7 @@ var xt = (() => {
 })();
 var L7 = SJ(uz(), 1);
 var nY = SJ(uz(), 1);
-var pE = (0, import_util3.promisify)(import_child_process3.execFile);
+var pE = (0, import_util3.promisify)(import_child_process4.execFile);
 var A7 = Buffer.from('{"type":"attribution-snapshot"');
 var XS = Buffer.from('{"type":"system"');
 var P9 = 10;
@@ -29193,14 +29210,14 @@ async function discoverSessionTranscripts(maxSessions, projectDir, projectsDirPa
   const encodedProjectDir = projectDir != null ? repoPathToClaudeProjectName(projectDir) : void 0;
   let projectDirEntries;
   try {
-    projectDirEntries = (await fs3.promises.readdir(sessionsDir)).map((d) => import_path10.default.join(sessionsDir, d));
+    projectDirEntries = (await fs4.promises.readdir(sessionsDir)).map((d) => import_path10.default.join(sessionsDir, d));
   } catch {
     return [];
   }
   for (const dir of projectDirEntries) {
     let stat;
     try {
-      stat = await fs3.promises.stat(dir);
+      stat = await fs4.promises.stat(dir);
     } catch {
       continue;
     }
@@ -29208,7 +29225,7 @@ async function discoverSessionTranscripts(maxSessions, projectDir, projectsDirPa
     const projectPath = import_path10.default.basename(dir);
     let filePaths;
     try {
-      filePaths = (await fs3.promises.readdir(dir)).filter((f2) => f2.endsWith(".jsonl"));
+      filePaths = (await fs4.promises.readdir(dir)).filter((f2) => f2.endsWith(".jsonl"));
     } catch {
       continue;
     }
@@ -29217,7 +29234,7 @@ async function discoverSessionTranscripts(maxSessions, projectDir, projectsDirPa
       const sessionId = import_path10.default.basename(sessionFilePath, ".jsonl");
       let fstat;
       try {
-        fstat = await fs3.promises.stat(sessionFilePath);
+        fstat = await fs4.promises.stat(sessionFilePath);
       } catch {
         continue;
       }
@@ -29239,7 +29256,7 @@ async function discoverSessionTranscripts(maxSessions, projectDir, projectsDirPa
   return maxSessions != null ? sessions.slice(0, maxSessions) : sessions;
 }
 async function* readLinesFromEnd(filePath, chunkSize = 65536, readFromByteOffset) {
-  const fd = await fs3.promises.open(filePath, "r");
+  const fd = await fs4.promises.open(filePath, "r");
   try {
     const stats = await fd.stat();
     const fileSize = readFromByteOffset ?? stats.size;
@@ -29298,7 +29315,7 @@ async function* streamTranscriptMessages(sessionJsonlFilePath, options) {
     if (readFromEnd) {
       lineSource = readLinesFromEnd(sessionJsonlFilePath, void 0, readFromByteOffset);
     } else {
-      fileStream = fs3.createReadStream(sessionJsonlFilePath, {
+      fileStream = fs4.createReadStream(sessionJsonlFilePath, {
         ...readFromByteOffset != null ? { start: readFromByteOffset } : {}
       });
       rl = import_readline3.default.createInterface({

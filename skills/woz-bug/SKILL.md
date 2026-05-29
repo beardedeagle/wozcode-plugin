@@ -1,6 +1,6 @@
 ---
 name: woz-bug
-description: Report a WOZCODE bug. Same backend as /woz-feedback, tagged for bug triage. Session context (current session id, anonymous id, OS, arch) is auto-attached.
+description: Report a WOZCODE bug. Same backend as /woz-feedback, tagged for bug triage. Session context (current session id, anonymous id, OS, arch, Node version) is auto-attached.
 allowed-tools: Bash(node *)
 ---
 
@@ -20,6 +20,6 @@ node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/wozcode-cli
 WOZ_FEEDBACK
 ```
 
-The CLI auto-attaches `CLAUDE_CODE_SESSION_ID`, anonymous telemetry id (unless the user opted out via `WOZCODE_TELEMETRY_DISABLED=true`), OS release, and architecture. The email is auto-filled from the logged-in account.
+The CLI auto-attaches `CLAUDE_CODE_SESSION_ID`, anonymous telemetry id (unless the user opted out via `WOZCODE_TELEMETRY_DISABLED=true`), OS release, architecture, and Node.js runtime version. The email is auto-filled from the logged-in account.
 
 On exit 0: tell the user "✅ Bug report sent. Thanks." On non-zero: relay the error verbatim and mention `support@withwoz.com` as a fallback.
