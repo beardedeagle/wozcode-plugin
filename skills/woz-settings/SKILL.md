@@ -40,6 +40,12 @@ Where `<key>` is a setting name and `<value>` is `true` or `false`.
 | `statusLineShare` | `true` | Show /woz-share referral hint in status line |
 | `spinnerVerbs` | `true` | WOZ-themed spinner verbs |
 | `alwaysLoadTools` | `true` | Load WOZCODE MCP tools up-front instead of deferring them behind ToolSearch |
+| `recall` | `true` | Session recall: the `Recall` MCP tool, the `/woz-recall` skill, and the background session indexer. Takes effect immediately. |
+| `liveReviewer` | `true` | Live PostToolUse reviewer (Sonnet on every Edit) |
+| `liveReviewerModel` | `claude-sonnet-4-6` | Model for the live pass. Unknown ids fall back to default. |
+| `deepEditCountReviewer` | `true` | Every-N-edits deep-pass cadence trigger |
+| `deepEditCountInterval` | `50` | Edits between deep cadence triggers (clamped to [5, 1000]) |
+| `wozReviewModel` | `claude-opus-4-7` | Default model for `/woz-review` and the every-N-edits cadence |
 | `userEnabled` | `true` | Master plugin on/off. When `false`, pins `settings.agent` to `woz:code-free` (native Claude tools available, WOZCODE MCP disallowed). Same toggle as the desktop tray's "WOZCODE plugin: ON/OFF". |
 | `showInMenuBar` | `true` | Whether the macOS menu-bar tray launches at login. Setting to `true` from the CLI re-launches the tray immediately. Setting to `false` unregisters the LaunchAgent; the running tray keeps going until quit. |
 
@@ -73,3 +79,4 @@ After updating settings, tell the user:
 - Most changes take effect immediately
 - For `statusLine`, `attribution`, and `spinnerVerbs`: also tell them to run `/reload-plugins` so Claude Code picks up the change in the current session
 - For `alwaysLoadTools`: tell them to **restart Claude Code** for the change to take effect (the helper already prints this reminder)
+- For `recall`: takes effect immediately; the first Recall after enabling kicks off background indexing (no restart needed)

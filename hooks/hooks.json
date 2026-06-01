@@ -33,15 +33,6 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "mcp__plugin_woz_code__Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/edit-batching-nudge.js"
-          }
-        ]
-      },
-      {
         "matcher": "",
         "hooks": [
           {
