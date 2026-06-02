@@ -6,7 +6,7 @@ allowed-tools: Bash(node *)
 
 # WOZCODE Settings
 
-Manage WOZCODE plugin settings stored in `~/.claude/settings.json` under the `wozcode` key.
+Manage WOZCODE plugin settings. Harness-specific knobs (attribution, status line, spinner verbs, the live-reviewer toggles, …) live in `~/.claude/settings.json` under the `wozcode` key; the overarching KnowledgeBase backend (`knowledgeBaseProvider`, `knowledgeBaseServerUrl`) lives in `~/.woz/settings.json`. Prefer the `--show` / `--set` helper below over hand-editing — it routes each setting to the right store and applies side effects.
 
 TRIGGER when: user says "woz settings", "woz config", "configure woz", "toggle attribution", "turn off status line", "disable co-authored-by", or similar.
 
@@ -48,6 +48,10 @@ Where `<key>` is a setting name and `<value>` is `true` or `false`.
 | `wozReviewModel` | `claude-opus-4-7` | Default model for `/woz-review` and the every-N-edits cadence |
 | `userEnabled` | `true` | Master plugin on/off. When `false`, pins `settings.agent` to `woz:code-free` (native Claude tools available, WOZCODE MCP disallowed). Same toggle as the desktop tray's "WOZCODE plugin: ON/OFF". |
 | `showInMenuBar` | `true` | Whether the macOS menu-bar tray launches at login. Setting to `true` from the CLI re-launches the tray immediately. Setting to `false` unregisters the LaunchAgent; the running tray keeps going until quit. |
+
+> **Build-dependent:** the live-reviewer knobs (`liveReviewer`, `liveReviewerModel`, `deepEditCountReviewer`, `deepEditCountInterval`, `wozReviewModel`) only apply on builds that bundle the reviewer surface. On other builds `--show` omits them and `--set` rejects them — treat the `--show` output as authoritative and don't offer to set a key it doesn't list.
+>
+> The KnowledgeBase backend settings (`knowledgeBaseProvider`, `knowledgeBaseServerUrl`) are independent: they live in `~/.woz/settings.json` and are **always** configurable, regardless of the build.
 
 ### About `alwaysLoadTools`
 
