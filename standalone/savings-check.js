@@ -45,50 +45,6 @@ var import_child_process7 = require("child_process");
 var fs5 = __toESM(require("fs"), 1);
 var path7 = __toESM(require("path"), 1);
 
-// src/common/config/config.ts
-var fsSync = __toESM(require("fs"), 1);
-var fs3 = __toESM(require("fs/promises"), 1);
-var os4 = __toESM(require("os"), 1);
-var path4 = __toESM(require("path"), 1);
-
-// src/common/claude-env.ts
-var fs = __toESM(require("fs"), 1);
-var os = __toESM(require("os"), 1);
-var path = __toESM(require("path"), 1);
-
-// src/common/claude-constants.ts
-var CLAUDE_CONFIG_DIR_ENV_VAR = "CLAUDE_CONFIG_DIR";
-
-// src/common/config/env-constants.ts
-var WOZCODE_HOST_ENV_VAR = "WOZCODE_HOST";
-
-// src/common/claude-env.ts
-var CLAUDE_DIR_NAME = ".claude";
-var CLAUDE_PROJECTS_DIR_NAME = "projects";
-function getClaudeHomePath(useEnv = true) {
-  const configPath = (useEnv ? process.env[CLAUDE_CONFIG_DIR_ENV_VAR] : void 0) ?? path.join(os.homedir(), CLAUDE_DIR_NAME);
-  return configPath;
-}
-function getProjectsPath() {
-  return path.join(getClaudeHomePath(), CLAUDE_PROJECTS_DIR_NAME);
-}
-
-// src/common/codex-paths.ts
-var os2 = __toESM(require("os"), 1);
-var path2 = __toESM(require("path"), 1);
-
-// src/common/woz-host.ts
-function initialHostFromEnv() {
-  return process.env[WOZCODE_HOST_ENV_VAR] === "codex" ? "codex" : "claude";
-}
-var currentHost = initialHostFromEnv();
-
-// src/common/wozcore/utils/file-concurrency-utils.ts
-var import_child_process = require("child_process");
-var fs2 = __toESM(require("fs"), 1);
-var os3 = __toESM(require("os"), 1);
-var path3 = __toESM(require("path"), 1);
-
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
 __export(external_exports, {
@@ -14603,7 +14559,65 @@ function date4(params) {
 // node_modules/zod/v4/classic/external.js
 config(en_default());
 
+// kb-shared/src/usage/token-counts.ts
+var TokenCountsSchema = external_exports.object({
+  inputTokens: external_exports.number(),
+  outputTokens: external_exports.number(),
+  cacheReadTokens: external_exports.number(),
+  cacheCreationTokens: external_exports.number(),
+  outputThinkingTokens: external_exports.number().default(0)
+});
+function addTokenUsage(target, source) {
+  target.inputTokens += source.inputTokens;
+  target.outputTokens += source.outputTokens;
+  target.cacheReadTokens += source.cacheReadTokens;
+  target.cacheCreationTokens += source.cacheCreationTokens;
+  target.outputThinkingTokens += source.outputThinkingTokens;
+}
+
+// src/common/config/config.ts
+var fsSync = __toESM(require("fs"), 1);
+var fs3 = __toESM(require("fs/promises"), 1);
+var os4 = __toESM(require("os"), 1);
+var path4 = __toESM(require("path"), 1);
+
+// src/common/claude-env.ts
+var fs = __toESM(require("fs"), 1);
+var os = __toESM(require("os"), 1);
+var path = __toESM(require("path"), 1);
+
+// src/common/claude-constants.ts
+var CLAUDE_CONFIG_DIR_ENV_VAR = "CLAUDE_CONFIG_DIR";
+
+// src/common/config/env-constants.ts
+var WOZCODE_HOST_ENV_VAR = "WOZCODE_HOST";
+
+// src/common/claude-env.ts
+var CLAUDE_DIR_NAME = ".claude";
+var CLAUDE_PROJECTS_DIR_NAME = "projects";
+function getClaudeHomePath(useEnv = true) {
+  const configPath = (useEnv ? process.env[CLAUDE_CONFIG_DIR_ENV_VAR] : void 0) ?? path.join(os.homedir(), CLAUDE_DIR_NAME);
+  return configPath;
+}
+function getProjectsPath() {
+  return path.join(getClaudeHomePath(), CLAUDE_PROJECTS_DIR_NAME);
+}
+
+// src/common/codex-paths.ts
+var os2 = __toESM(require("os"), 1);
+var path2 = __toESM(require("path"), 1);
+
+// src/common/woz-host.ts
+function initialHostFromEnv() {
+  return process.env[WOZCODE_HOST_ENV_VAR] === "codex" ? "codex" : "claude";
+}
+var currentHost = initialHostFromEnv();
+
 // src/common/wozcore/utils/file-concurrency-utils.ts
+var import_child_process = require("child_process");
+var fs2 = __toESM(require("fs"), 1);
+var os3 = __toESM(require("os"), 1);
+var path3 = __toESM(require("path"), 1);
 var FileLockInfoSchema = external_exports.object({
   pid: external_exports.number(),
   lockAcquiredAtMs: external_exports.number(),
@@ -14616,7 +14630,7 @@ var FileLockInfoSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.75",
+  version: "0.3.76",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -14643,7 +14657,7 @@ var package_default = {
     "dev:codex:remove": "npm run build:codex && node wozcode-plugin-codex/wozcode/scripts/install.js --remove",
     "dev:desktop": "npm run build:desktop:css && bunx electrobun dev",
     lint: "npx eslint src/ kb-shared/src/",
-    compile: "tsc --noEmit && tsc --noEmit -p tsconfig.webview.json",
+    compile: "tsc --noEmit && tsc --noEmit -p tsconfig.webview.json && tsc --noEmit -p tsconfig.webview-test.json",
     format: "npx prettier --write 'src/**/*.{ts,js}' 'kb-shared/src/**/*.{ts,js}'",
     test: 'node --import tsx --test "src/**/*.test.ts" "kb-shared/src/**/*.test.ts"',
     "pretest:integration": "npm run build:plugins",
@@ -14748,7 +14762,12 @@ var WozcodeActiveBonusSchema = external_exports.object({
   endsAt: external_exports.string().nullish().transform((v2) => v2 ?? void 0)
 });
 var SubscriptionStatusSchema = external_exports.object({
-  isValid: external_exports.boolean(),
+  // Tri-state: `true` = valid/usable; `false` = server-denied (invalid or
+  // over-limit); `undefined` = validity unknown (validated but unreachable —
+  // RPC outage past grace, or token refresh failed) → callers treat it as
+  // fail-closed. Distinct from the whole `subscriptionStatus` being absent,
+  // which means "never validated / fresh login" (advertise optimistically).
+  isValid: external_exports.boolean().nullish().transform((v2) => v2 ?? void 0),
   message: external_exports.string().nullish().transform((v2) => v2 ?? void 0),
   // Unknown values silently become undefined (forward-compat). Case-insensitive match is
   // defensive against transient backend drift or old-payload replay from cached credentials.
@@ -14799,6 +14818,7 @@ function pricingWithLongContext(baseInput, baseOutput, thresholdTokens, longInpu
   };
 }
 var MODEL_PRICING = {
+  "claude-opus-4-8": pricingFromInput(5, 25),
   "claude-opus-4-7": pricingFromInput(5, 25),
   "claude-opus-4-6": pricingFromInput(5, 25),
   "claude-opus-4-5": pricingFromInput(5, 25),
@@ -14880,24 +14900,13 @@ function getModelPricing(model) {
 }
 
 // src/common/usage/usage-types.ts
-var TokenCountsSchema = external_exports.object({
-  inputTokens: external_exports.number(),
-  outputTokens: external_exports.number(),
-  cacheReadTokens: external_exports.number(),
-  cacheCreationTokens: external_exports.number()
-});
-function addTokenUsage(target, source) {
-  target.inputTokens += source.inputTokens;
-  target.outputTokens += source.outputTokens;
-  target.cacheReadTokens += source.cacheReadTokens;
-  target.cacheCreationTokens += source.cacheCreationTokens;
-}
 function emptyTranscriptUsage() {
   return {
     inputTokens: 0,
     outputTokens: 0,
     cacheReadTokens: 0,
     cacheCreationTokens: 0,
+    outputThinkingTokens: 0,
     turnCount: 0,
     toolUseCount: 0
   };
@@ -33673,7 +33682,8 @@ function ingestAssistantMessage(state, entry) {
     inputTokens: msg.usage.input_tokens,
     outputTokens: msg.usage.output_tokens,
     cacheReadTokens: msg.usage.cache_read_input_tokens ?? 0,
-    cacheCreationTokens: msg.usage.cache_creation_input_tokens ?? 0
+    cacheCreationTokens: msg.usage.cache_creation_input_tokens ?? 0,
+    outputThinkingTokens: msg.usage.output_tokens_details?.thinking_tokens ?? 0
   };
   addTokenUsage(state.usage, usage);
   state.usage.turnCount++;
