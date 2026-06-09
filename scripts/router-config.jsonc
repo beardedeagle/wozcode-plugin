@@ -106,9 +106,10 @@
                 "preset": ["/claudecode", "/claudecode-azure"]
               },
               "systemPrompt": {
+                /* Steering bullets disabled - redundant with the MCP Search/Edit tool descriptions.
                 "append": [
                   "\n\n- Batch all changes for a task into ONE mcp__plugin_woz_code__Edit call's edits[] array — not one Edit call per file. Ten edits in one call beats ten calls with one edit each.\n- Search up front, then apply edits together. Don't search-edit-search-edit.\n- Combine independent searches into one mcp__plugin_woz_code__Search call (multiple file_glob_patterns or alternation in content_regex) instead of issuing them one at a time.\n- The Edit tool's \"smallest edit\" guidance is about each edit's payload size (don't regenerate untouched lines), not about the scope of work for the task. Do everything the prompt asks for in your batched Edit call."
-                ]
+                ] */
               }
             }
           ]
@@ -191,11 +192,12 @@
   ],
   // Catalog of canonical models. Bindings reference these via `model` to
   // inherit shared properties (driver, pricing, request modifications).
-  // Pricing is auto-injected from `src/common/pricing/pricing-table.ts` when
+  // Pricing is auto-injected from `src/router/router-config-pricing.ts` when
   // not set inline.
   "models": [
     { "id": "moonshotai:kimi-k2.6", "driver": "moonshotai" },
     { "id": "moonshotai:kimi-k2.5", "driver": "moonshotai" },
+    { "id": "anthropic:claude-opus-4-8" },
     { "id": "anthropic:claude-opus-4-7" },
     { "id": "anthropic:claude-opus-4-6" },
     { "id": "anthropic:claude-opus-4-5" },
@@ -450,9 +452,10 @@
         },
         {
           "systemPrompt": {
+            /* Steering bullets disabled - redundant with the MCP Search/Edit tool descriptions; the load-bearing edit rewrites below stay active.
             "append": [
               "\n\n- Batch all changes for a task into ONE mcp__plugin_woz_code__Edit call's edits[] array — not one Edit call per file. Ten edits in one call beats ten calls with one edit each.\n- Search up front, then apply edits together. Don't search-edit-search-edit.\n- Combine independent searches into one mcp__plugin_woz_code__Search call (multiple file_glob_patterns or alternation in content_regex) instead of issuing them one at a time.\n- The Edit tool's \"smallest edit\" guidance is about each edit's payload size (don't regenerate untouched lines), not about the scope of work for the task. Do everything the prompt asks for in your batched Edit call."
-            ],
+            ], */
             "edit": [
               {
                 "search": "- When you search for text or files, you reach first for `rg`${**}- You parallelize tool calls whenever you can, especially file reads such as `cat`, `rg`, `sed`, `ls`, `${*}\n",
@@ -484,9 +487,10 @@
         },
         {
           "systemPrompt": {
+            /* Steering bullets disabled - redundant with the MCP Search/Edit tool descriptions; the load-bearing edit rewrites below stay active.
             "append": [
               "\n\n- Batch all changes for a task into ONE mcp__plugin_woz_code__Edit call's edits[] array — not one Edit call per file. Ten edits in one call beats ten calls with one edit each.\n- Search up front, then apply edits together. Don't search-edit-search-edit.\n- Combine independent searches into one mcp__plugin_woz_code__Search call (multiple file_glob_patterns or alternation in content_regex) instead of issuing them one at a time.\n- The Edit tool's \"smallest edit\" guidance is about each edit's payload size (don't regenerate untouched lines), not about the scope of work for the task. Do everything the prompt asks for in your batched Edit call."
-            ],
+            ], */
             "edit": [
               {
                 "search": "- When you search for text or files, you reach first for `rg`${**}- You parallelize tool calls whenever you can, especially file reads such as `cat`, `rg`, `sed`, `ls`, `${*}\n",

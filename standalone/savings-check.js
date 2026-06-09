@@ -14615,6 +14615,7 @@ var currentHost = initialHostFromEnv();
 
 // src/common/wozcore/utils/file-concurrency-utils.ts
 var import_child_process = require("child_process");
+var crypto = __toESM(require("crypto"), 1);
 var fs2 = __toESM(require("fs"), 1);
 var os3 = __toESM(require("os"), 1);
 var path3 = __toESM(require("path"), 1);
@@ -14630,7 +14631,7 @@ var FileLockInfoSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.76",
+  version: "0.3.77",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -14792,7 +14793,11 @@ var SubscriptionStatusSchema = external_exports.object({
     const trimmed = v2?.trim();
     return trimmed != null && trimmed.length > 0 ? trimmed : void 0;
   }),
-  upgradeUrl: external_exports.string().nullish().transform((v2) => v2 ?? void 0)
+  upgradeUrl: external_exports.string().nullish().transform((v2) => v2 ?? void 0),
+  // Org-level KnowledgeBase / reviewer entitlement; camelCase mirror of the
+  // private.wozcode_subscription.kb_access_enabled column. Absent on pre-
+  // entitlement servers → undefined → callers fail open (see kb-access-gate).
+  kbAccessEnabled: external_exports.boolean().nullish().transform((v2) => v2 ?? void 0)
 });
 
 // src/common/pricing/model-pricing.ts
@@ -14916,6 +14921,12 @@ function addTranscriptUsage(target, source) {
   target.turnCount += source.turnCount;
   target.toolUseCount += source.toolUseCount;
 }
+var SavingsBucketSchema = external_exports.object({
+  callsSaved: external_exports.number(),
+  timeSavedInMs: external_exports.number(),
+  tokensSaved: external_exports.number(),
+  costSavedInUsd: external_exports.number()
+});
 function emptySavings() {
   return { callsSaved: 0, timeSavedInMs: 0, tokensSaved: 0, costSavedInUsd: 0 };
 }

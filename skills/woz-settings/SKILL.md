@@ -45,7 +45,7 @@ Where `<key>` is a setting name and `<value>` is `true` or `false`.
 | `liveReviewerModel` | `claude-sonnet-4-6` | Model for the live pass. Unknown ids fall back to default. |
 | `deepEditCountReviewer` | `true` | Every-N-edits deep-pass cadence trigger |
 | `deepEditCountInterval` | `50` | Edits between deep cadence triggers (clamped to [5, 1000]) |
-| `wozReviewModel` | `claude-opus-4-7` | Default model for `/woz-review` and the every-N-edits cadence. Accepts `provider/model` syntax (e.g. `azure-foundry/gpt-5.5-1`, `openai/gpt-5.5`) to auto-route through the WOZCODE router — requires `wozcode router start`. |
+| `wozReviewModel` | `''` (current model) | Pinned model for `/woz-review` and the every-N-edits cadence. Empty = your current/SDK-default model; set a model id to pin it. Accepts `provider/model` syntax (e.g. `azure-foundry/gpt-5.5-1`, `openai/gpt-5.5`) to auto-route through the WOZCODE router — requires `wozcode router start`. |
 | `reviewerBaseUrl` | `''` | Optional ANTHROPIC_BASE_URL applied to both live and deep reviewers. Use this only when the router runs on a non-default host/port; routed model syntax above is the normal path. |
 | `userEnabled` | `true` | Master plugin on/off. When `false`, pins `settings.agent` to `woz:code-free` (native Claude tools available, WOZCODE MCP disallowed). Same toggle as the desktop tray's "WOZCODE plugin: ON/OFF". |
 | `showInMenuBar` | `true` | Whether the macOS menu-bar tray launches at login. Setting to `true` from the CLI re-launches the tray immediately. Setting to `false` unregisters the LaunchAgent; the running tray keeps going until quit. |
