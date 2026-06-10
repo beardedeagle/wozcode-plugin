@@ -197,6 +197,7 @@
   "models": [
     { "id": "moonshotai:kimi-k2.6", "driver": "moonshotai" },
     { "id": "moonshotai:kimi-k2.5", "driver": "moonshotai" },
+    { "id": "anthropic:claude-fable-5" },
     { "id": "anthropic:claude-opus-4-8" },
     { "id": "anthropic:claude-opus-4-7" },
     { "id": "anthropic:claude-opus-4-6" },
@@ -452,18 +453,18 @@
         },
         {
           "systemPrompt": {
-            /* Steering bullets disabled - redundant with the MCP Search/Edit tool descriptions; the load-bearing edit rewrites below stay active.
+            /* Steering bullets disabled - redundant with the MCP Search/Edit tool descriptions; the load-bearing edit rewrites below stay active (slimmed to a minimal pointer; the redundant batching/parallelize prose lives in the MCP Search/Edit tool descriptions, paid once instead of re-billed every resumed turn).
             "append": [
               "\n\n- Batch all changes for a task into ONE mcp__plugin_woz_code__Edit call's edits[] array — not one Edit call per file. Ten edits in one call beats ten calls with one edit each.\n- Search up front, then apply edits together. Don't search-edit-search-edit.\n- Combine independent searches into one mcp__plugin_woz_code__Search call (multiple file_glob_patterns or alternation in content_regex) instead of issuing them one at a time.\n- The Edit tool's \"smallest edit\" guidance is about each edit's payload size (don't regenerate untouched lines), not about the scope of work for the task. Do everything the prompt asks for in your batched Edit call."
             ], */
             "edit": [
               {
                 "search": "- When you search for text or files, you reach first for `rg`${**}- You parallelize tool calls whenever you can, especially file reads such as `cat`, `rg`, `sed`, `ls`, `${*}\n",
-                "replace": "- When you search for text, discover files, or read file contents, use mcp__plugin_woz_code__Search instead of shell commands such as `rg`, `grep`, `cat`, `sed`, or `ls`.\n- Parallelize independent tool calls when possible, but prefer one combined mcp__plugin_woz_code__Search call for related file discovery, grep-style searches, and reads.\n"
+                "replace": "- Use mcp__plugin_woz_code__Search for all file discovery, text search, and file reads instead of shell commands such as `rg`, `grep`, `cat`, `sed`, or `ls`.\n"
               },
               {
                 "search": "- Use `apply_patch` for manual code edits.${**}- Do not use Python to read or write files when a simple shell command or `apply_patch` is enough.\n",
-                "replace": "- Use mcp__plugin_woz_code__Edit for manual code edits, file creation, and search/replace changes. Batch all changes for a task into one Edit call's edits[] array.\n- Do not use `apply_patch`, `cat`, heredocs, Python scripts, or other shell write tricks to create or edit files when mcp__plugin_woz_code__Edit can do it.\n"
+                "replace": "- Use mcp__plugin_woz_code__Edit for all file creation and code edits instead of `apply_patch`, `cat`, heredocs, or Python write tricks.\n"
               },
               {
                 "search": "## `apply_patch`\n${**}\nshell {\"command\":[\"apply_patch\",\"*** Begin Patch\\n*** Add File: hello.txt\\n+Hello, world!\\n*** End Patch\\n\"]}\n```"
@@ -487,18 +488,18 @@
         },
         {
           "systemPrompt": {
-            /* Steering bullets disabled - redundant with the MCP Search/Edit tool descriptions; the load-bearing edit rewrites below stay active.
+            /* Steering bullets disabled - redundant with the MCP Search/Edit tool descriptions; the load-bearing edit rewrites below stay active (slimmed to a minimal pointer; the redundant batching/parallelize prose lives in the MCP Search/Edit tool descriptions, paid once instead of re-billed every resumed turn).
             "append": [
               "\n\n- Batch all changes for a task into ONE mcp__plugin_woz_code__Edit call's edits[] array — not one Edit call per file. Ten edits in one call beats ten calls with one edit each.\n- Search up front, then apply edits together. Don't search-edit-search-edit.\n- Combine independent searches into one mcp__plugin_woz_code__Search call (multiple file_glob_patterns or alternation in content_regex) instead of issuing them one at a time.\n- The Edit tool's \"smallest edit\" guidance is about each edit's payload size (don't regenerate untouched lines), not about the scope of work for the task. Do everything the prompt asks for in your batched Edit call."
             ], */
             "edit": [
               {
                 "search": "- When you search for text or files, you reach first for `rg`${**}- You parallelize tool calls whenever you can, especially file reads such as `cat`, `rg`, `sed`, `ls`, `${*}\n",
-                "replace": "- When you search for text, discover files, or read file contents, use mcp__plugin_woz_code__Search instead of shell commands such as `rg`, `grep`, `cat`, `sed`, or `ls`.\n- Parallelize independent tool calls when possible, but prefer one combined mcp__plugin_woz_code__Search call for related file discovery, grep-style searches, and reads.\n"
+                "replace": "- Use mcp__plugin_woz_code__Search for all file discovery, text search, and file reads instead of shell commands such as `rg`, `grep`, `cat`, `sed`, or `ls`.\n"
               },
               {
                 "search": "- Use `apply_patch` for manual code edits.${**}- Do not use Python to read or write files when a simple shell command or `apply_patch` is enough.\n",
-                "replace": "- Use mcp__plugin_woz_code__Edit for manual code edits, file creation, and search/replace changes. Batch all changes for a task into one Edit call's edits[] array.\n- Do not use `apply_patch`, `cat`, heredocs, Python scripts, or other shell write tricks to create or edit files when mcp__plugin_woz_code__Edit can do it.\n"
+                "replace": "- Use mcp__plugin_woz_code__Edit for all file creation and code edits instead of `apply_patch`, `cat`, heredocs, or Python write tricks.\n"
               },
               {
                 "search": "## `apply_patch`\n${**}\nshell {\"command\":[\"apply_patch\",\"*** Begin Patch\\n*** Add File: hello.txt\\n+Hello, world!\\n*** End Patch\\n\"]}\n```"

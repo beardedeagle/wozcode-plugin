@@ -14631,7 +14631,7 @@ var FileLockInfoSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.77",
+  version: "0.3.78",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -14823,6 +14823,7 @@ function pricingWithLongContext(baseInput, baseOutput, thresholdTokens, longInpu
   };
 }
 var MODEL_PRICING = {
+  "claude-fable-5": pricingFromInput(10, 50),
   "claude-opus-4-8": pricingFromInput(5, 25),
   "claude-opus-4-7": pricingFromInput(5, 25),
   "claude-opus-4-6": pricingFromInput(5, 25),
@@ -14833,6 +14834,7 @@ var MODEL_PRICING = {
   "claude-sonnet-4-0": pricingFromInput(3, 15),
   "claude-haiku-4-5": pricingFromInput(0.8, 4),
   "claude-haiku-3-5": pricingFromInput(0.8, 4),
+  fable: pricingFromInput(10, 50),
   opus: pricingFromInput(5, 25),
   sonnet: pricingFromInput(3, 15),
   haiku: pricingFromInput(0.8, 4),
@@ -14889,7 +14891,7 @@ function modelContainsSegment(model, candidate) {
     const afterIdx = idx + candidate.length;
     const after = afterIdx >= model.length ? "" : model[afterIdx];
     const leftOk = before === "" || before === "/" || before === ":";
-    const rightOk = after === "" || after === "-" || after === "/" || after === ":";
+    const rightOk = after === "" || after === "-" || after === "/" || after === ":" || after === "[";
     if (leftOk && rightOk) return true;
     idx++;
   }
@@ -14913,13 +14915,15 @@ function emptyTranscriptUsage() {
     cacheCreationTokens: 0,
     outputThinkingTokens: 0,
     turnCount: 0,
-    toolUseCount: 0
+    toolUseCount: 0,
+    costInUsd: 0
   };
 }
 function addTranscriptUsage(target, source) {
   addTokenUsage(target, source);
   target.turnCount += source.turnCount;
   target.toolUseCount += source.toolUseCount;
+  target.costInUsd += source.costInUsd;
 }
 var SavingsBucketSchema = external_exports.object({
   callsSaved: external_exports.number(),
