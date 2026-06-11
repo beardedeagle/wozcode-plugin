@@ -6,7 +6,7 @@ allowed-tools: Bash(node *)
 
 # WOZCODE Settings
 
-Manage WOZCODE plugin settings. Harness-specific knobs (attribution, status line, spinner verbs, the live-reviewer toggles, …) live in `~/.claude/settings.json` under the `wozcode` key; the overarching KnowledgeBase backend (`knowledgeBaseProvider`, `knowledgeBaseServerUrl`) lives in `~/.woz/settings.json`. Prefer the `--show` / `--set` helper below over hand-editing — it routes each setting to the right store and applies side effects.
+Manage WOZCODE plugin settings. The user-facing knobs (attribution, status line, spinner verbs, the live-reviewer toggles, …) live in `~/.claude/settings.json` under the `wozcode` key. Prefer the `--show` / `--set` helper below over hand-editing — it applies the right side effects.
 
 TRIGGER when: user says "woz settings", "woz config", "configure woz", "toggle attribution", "turn off status line", "disable co-authored-by", or similar.
 
@@ -41,18 +41,17 @@ Where `<key>` is a setting name and `<value>` is `true` or `false`.
 | `spinnerVerbs` | `true` | WOZ-themed spinner verbs |
 | `alwaysLoadTools` | `true` | Load WOZCODE MCP tools up-front instead of deferring them behind ToolSearch |
 | `recall` | `true` | Session recall: the `Recall` MCP tool, the `/woz-recall` skill, and the background session indexer. Takes effect immediately. |
-| `liveReviewer` | `true` | Live PostToolUse reviewer (Sonnet on every Edit) |
-| `liveReviewerModel` | `claude-sonnet-4-6` | Model for the live pass. Unknown ids fall back to default. |
-| `deepEditCountReviewer` | `true` | Every-N-edits deep-pass cadence trigger |
+| `liveReviewer` | `false` | Live PostToolUse reviewer (runs on every Edit) |
+| `liveReviewerModel` | (live-pass default) | Model id for the live pass. Unknown ids fall back to the default. |
+| `deepEditCountReviewer` | `false` | Every-N-edits deep-pass cadence trigger |
 | `deepEditCountInterval` | `50` | Edits between deep cadence triggers (clamped to [5, 1000]) |
-| `wozReviewModel` | `''` (current model) | Pinned model for `/woz-review` and the every-N-edits cadence. Empty = your current/SDK-default model; set a model id to pin it. Accepts `provider/model` syntax (e.g. `azure-foundry/gpt-5.5-1`, `openai/gpt-5.5`) to auto-route through the WOZCODE router — requires `wozcode router start`. |
-| `reviewerBaseUrl` | `''` | Optional ANTHROPIC_BASE_URL applied to both live and deep reviewers. Use this only when the router runs on a non-default host/port; routed model syntax above is the normal path. |
+| `wozReviewModel` | `''` (current model) | Pinned model for `/woz-review` and the every-N-edits cadence. Empty = your current/SDK-default model; set a model id to pin it. Accepts `provider/model` syntax to auto-route through the WOZCODE router — requires `wozcode router start`. |
 | `userEnabled` | `true` | Master plugin on/off. When `false`, pins `settings.agent` to `woz:code-free` (native Claude tools available, WOZCODE MCP disallowed). Same toggle as the desktop tray's "WOZCODE plugin: ON/OFF". |
 | `showInMenuBar` | `true` | Whether the macOS menu-bar tray launches at login. Setting to `true` from the CLI re-launches the tray immediately. Setting to `false` unregisters the LaunchAgent; the running tray keeps going until quit. |
 
-> **Build-dependent:** the live-reviewer knobs (`liveReviewer`, `liveReviewerModel`, `deepEditCountReviewer`, `deepEditCountInterval`, `wozReviewModel`) only apply on builds that bundle the reviewer surface. On other builds `--show` omits them and `--set` rejects them — treat the `--show` output as authoritative and don't offer to set a key it doesn't list.
+> **Runtime-gated on KB access:** the live-reviewer knobs (`liveReviewer`, `liveReviewerModel`, `deepEditCountReviewer`, `deepEditCountInterval`, `wozReviewModel`) ship in every build but are gated on the org's KnowledgeBase-access entitlement at runtime — `--show` omits them and `--set` rejects them when the org isn't entitled. Treat the `--show` output as authoritative and don't offer to set a key it doesn't list.
 >
-> The KnowledgeBase backend settings (`knowledgeBaseProvider`, `knowledgeBaseServerUrl`) are independent: they live in `~/.woz/settings.json` and are **always** configurable, regardless of the build.
+> The KnowledgeBase backend settings (`knowledgeBaseProvider`, `knowledgeBaseServerUrl`) and `reviewerBaseUrl` are internal/infra and are not surfaced by `--show` for now.
 
 ### About `alwaysLoadTools`
 

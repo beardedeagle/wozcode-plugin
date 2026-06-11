@@ -33,6 +33,15 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "mcp__plugin_woz_code__Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node --no-warnings=ExperimentalWarning ${CLAUDE_PLUGIN_ROOT}/scripts/reviewer-hook.js"
+          }
+        ]
+      },
+      {
         "matcher": "",
         "hooks": [
           {

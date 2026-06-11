@@ -14631,7 +14631,7 @@ var FileLockInfoSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.78",
+  version: "0.3.79",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -14796,7 +14796,7 @@ var SubscriptionStatusSchema = external_exports.object({
   upgradeUrl: external_exports.string().nullish().transform((v2) => v2 ?? void 0),
   // Org-level KnowledgeBase / reviewer entitlement; camelCase mirror of the
   // private.wozcode_subscription.kb_access_enabled column. Absent on pre-
-  // entitlement servers → undefined → callers fail open (see kb-access-gate).
+  // entitlement servers → undefined → strict callers fail closed (see kb-access-gate).
   kbAccessEnabled: external_exports.boolean().nullish().transform((v2) => v2 ?? void 0)
 });
 
