@@ -173,6 +173,31 @@
       }
     },
     {
+      // Passthrough for the vanilla-codex benchmark request-log capture. No
+      // apiKey/backend, so it resolves even when OPENAI_API_KEY is unset
+      // (ChatGPT-login-only machines) and `/codex-passthrough` forwards the
+      // inbound bearer verbatim. `${CODEX_OPENAI_BASE_URL}` lets the benchmark
+      // point this at any OpenAI-wire upstream (e.g. Azure Foundry, set by the
+      // codex runner from the model prefix); unset → OpenAI direct.
+      "id": "codex-passthrough-apikey",
+      "baseUrl": "${CODEX_OPENAI_BASE_URL:-https://api.openai.com/v1/}",
+      "transports": {
+        "openai": {}
+      }
+    },
+    {
+      // Passthrough to the ChatGPT backend. No apiKey/backend: the preset
+      // forwards the inbound ChatGPT bearer + `chatgpt-account-id` header
+      // verbatim (contrast the request-modifying `chatgpt` / chatgpt-oauth
+      // provider). Selected by `/codex-passthrough`'s providerSelectors when
+      // the inbound request carries `chatgpt-account-id`.
+      "id": "codex-passthrough-chatgpt",
+      "baseUrl": "https://chatgpt.com/backend-api/codex/",
+      "transports": {
+        "openai": {}
+      }
+    },
+    {
       // Native Anthropic API. Targeted by `/claudecode` and `/anthropic`
       // presets, both of which forward inbound auth headers.
       "id": "anthropic",
@@ -511,6 +536,22 @@
       "modelMappings": [
         // Codex CLI sends `gpt-5.5`; Foundry's deployment name is `gpt-5.5-1`.
         { "model": "gpt-5.5", "target": "gpt-5.5-1" }
+      ]
+    },
+    {
+      // Vanilla-codex benchmark request-log capture. One preset URL serves
+      // both OpenAI-apikey and ChatGPT-login codex sessions: `defaultProvider`
+      // handles the apikey credential, and the providerSelector swaps in the
+      // ChatGPT upstream when the inbound request carries `chatgpt-account-id`.
+      // `passThroughAuth` forwards whichever credential codex attached verbatim
+      // (each is only valid against its own upstream). Pure passthrough — no
+      // tool stripping or prompt rewrites (contrast /codex), so the captured
+      // /responses traffic mirrors a vanilla codex session.
+      "path": "/codex-passthrough",
+      "defaultProvider": "codex-passthrough-apikey",
+      "passThroughAuth": true,
+      "providerSelectors": [
+        { "when": { "headerPresent": "chatgpt-account-id" }, "provider": "codex-passthrough-chatgpt" }
       ]
     }
   ]
