@@ -14631,7 +14631,7 @@ var FileLockInfoSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.80",
+  version: "0.3.81",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -14663,7 +14663,7 @@ var package_default = {
     test: 'node --import tsx --test "src/**/*.test.ts" "kb-shared/src/**/*.test.ts"',
     "pretest:integration": "npm run build:plugins",
     "build:integration:obfuscated": "npm run build:claude:all:prod -- --for-integration-tests && npm run build:codex:prod -- --for-integration-tests",
-    "test:integration": 'node --import tsx --test "src/test/integration/**/*.int-test.ts"'
+    "test:integration": 'node --import tsx --test --test-concurrency=1 --test-force-exit "src/test/integration/**/*.int-test.ts"'
   },
   author: "Woz",
   license: "UNLICENSED",
@@ -14678,11 +14678,14 @@ var package_default = {
     "@smithy/protocol-http": "^5.4.5",
     "@smithy/signature-v4": "^5.4.5",
     "@supabase/supabase-js": "^2.106.2",
+    "@wozcode/kb-shared": "file:./kb-shared",
+    "@xterm/headless": "^5.5.0",
     commander: "~14.0.3",
     electrobun: "^1.0.0",
     glob: "^13.0.6",
     "html-validate": "^11.4.0",
     mysql2: "^3.22.4",
+    "node-pty": "^1.0.0",
     "pdf-parse": "^2.4.5",
     playwright: "^1.59.1",
     postgres: "~3.4.9",
@@ -14693,8 +14696,7 @@ var package_default = {
     typescript: "~5.9.2",
     "web-tree-sitter": "^0.26.9",
     yaml: "^2.9.0",
-    zod: "^4.4.3",
-    "@wozcode/kb-shared": "file:./kb-shared"
+    zod: "^4.4.3"
   },
   devDependencies: {
     "@ampproject/remapping": "^2.3.0",
@@ -14709,17 +14711,20 @@ var package_default = {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/utils": "^8.60.0",
-    "@xterm/headless": "^5.5.0",
     dotenv: "~17.4.2",
     esbuild: "^0.28.0",
     eslint: "~10.4.0",
     "javascript-obfuscator": "^5.4.1",
-    "node-pty": "^1.0.0",
     openai: "~6.39.1",
     prettier: "^3.8.3",
     tailwindcss: "^4.2.2",
+    "tree-sitter-python": "0.25.0",
     tsx: "~4.21.0",
     "typescript-eslint": "^8.60.0"
+  },
+  vendoredDependencies: {
+    "@lydell/node-pty": "1.2.0-beta.12",
+    "@homebridge/node-pty-prebuilt-multiarch": "0.14.0"
   },
   engines: {
     node: ">=22.5"
@@ -14736,6 +14741,9 @@ var WOZ_EXPLORE_AGENT_NAME = `${WOZ_CODE_PLUGIN_NAME}:explore`;
 var BENCHMARK_SCRIPT_KEY = "benchmark";
 var BENCHMARK_SCRIPT_NAME = `${BENCHMARK_SCRIPT_KEY}.js`;
 var WOZCODE_CLI_WRAPPER_NAME = WOZCODE_CLI_NAME;
+var CLAUDE_TUI_CLI_SCRIPT_KEY = "claude-tui-cli";
+var CLAUDE_TUI_CLI_SCRIPT_NAME = `${CLAUDE_TUI_CLI_SCRIPT_KEY}.js`;
+var CLAUDE_TUI_CLI_SOURCE_NAME = `${CLAUDE_TUI_CLI_SCRIPT_KEY}.ts`;
 var WOZCODE_CLI_WRAPPER_FILENAME_WIN = `${WOZCODE_CLI_WRAPPER_NAME}.cmd`;
 var ROUTER_DAEMON_SCRIPT_KEY = "router-daemon";
 var ROUTER_DAEMON_SCRIPT_NAME = `${ROUTER_DAEMON_SCRIPT_KEY}.js`;
@@ -14750,6 +14758,16 @@ var WOZ_DESKTOP_APP_NAME = WOZCODE_BRAND_NAME;
 var WOZ_DESKTOP_BUNDLE_NAME = `${WOZ_DESKTOP_APP_NAME}.app`;
 
 // src/common/config/auth-types.ts
+var WozCredentialsSchema = external_exports.object({
+  accessToken: external_exports.string(),
+  refreshToken: external_exports.string(),
+  expiresAt: external_exports.string(),
+  userId: external_exports.string(),
+  email: external_exports.string(),
+  organizationId: external_exports.string().optional(),
+  referralCode: external_exports.string().optional(),
+  isAnonymous: external_exports.boolean().optional()
+});
 var ReferralCodeResponseSchema = external_exports.object({
   code: external_exports.string(),
   timesRedeemed: external_exports.number(),

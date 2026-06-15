@@ -41,6 +41,7 @@ Where `<key>` is a setting name and `<value>` is `true` or `false`.
 | `spinnerVerbs` | `true` | WOZ-themed spinner verbs |
 | `alwaysLoadTools` | `true` | Load WOZCODE MCP tools up-front instead of deferring them behind ToolSearch |
 | `recall` | `true` | Session recall: the `Recall` MCP tool, the `/woz-recall` skill, and the background session indexer. Takes effect immediately. |
+| `syntaxValidation` | `true` | Post-edit syntax warnings in the Edit tool (tree-sitter / TypeScript / JSON / YAML / HTML). Takes effect immediately. Per-repo override: `.wozcode.json` `{"features": {"syntaxValidation": false}}`. |
 | `liveReviewer` | `false` | Live PostToolUse reviewer (runs on every Edit) |
 | `liveReviewerModel` | (live-pass default) | Model id for the live pass. Unknown ids fall back to the default. |
 | `deepEditCountReviewer` | `false` | Every-N-edits deep-pass cadence trigger |
