@@ -14631,7 +14631,7 @@ var FileLockInfoSchema = external_exports.object({
 // package.json
 var package_default = {
   name: "wozcode",
-  version: "0.3.82",
+  version: "0.3.83",
   description: "WOZCODE enhanced coding tools \u2014 smart search, batch editing, SQL introspection, and cost-optimized subagent delegation",
   homepage: "https://wozcode.com",
   type: "module",
@@ -14652,6 +14652,7 @@ var package_default = {
     "build:desktop:css": "npx @tailwindcss/cli -i src/desktop/webview/input.css -o src/desktop/webview/styles.css",
     "build:desktop": "npm run build:desktop:css && bunx electrobun build && npm run patch:desktop",
     "build:desktop:release": "npm run build:desktop:css && WOZ_RELEASE_BUILD=1 bunx electrobun build --env=stable && npm run patch:desktop",
+    "build:tuning-bundle": "tsx scripts/build-tuning-bundle.ts --no-obfuscate",
     "patch:desktop": "tsx scripts/patch-desktop-plist.ts",
     "package:desktop": "tsx scripts/package-desktop.ts",
     "dev:codex": "npm run build:codex && node wozcode-plugin-codex/wozcode/scripts/install.js",
